@@ -7,23 +7,23 @@ namespace MohamedSprint1V2.DAL.Entity
         public Product() { }
         public int Id { get; private set; }
 
-        public Product( string name, string description, string img, decimal Price, int categoryId)
+        public Product( string name, string description, string img, decimal price, int categoryId)
         {
             //Id = id;
             Name = name;
             Description = description;
             Img = img;
-            Price = Price;
+            Price = price;
             CategoryId = categoryId;
         }
 
-        public Product(int id,string name, string description, string img, decimal Price, int categoryId)
+        public Product(int id,string name, string description, string img, decimal price, int categoryId)
         {
             Id = id;
             Name = name;
             Description = description;
             Img = img;
-            Price = Price;
+            Price = price;
             CategoryId = categoryId;
         }
         [Required]

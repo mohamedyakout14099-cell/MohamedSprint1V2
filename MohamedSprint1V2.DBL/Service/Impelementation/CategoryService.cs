@@ -4,10 +4,10 @@ namespace MohamedSprint1V2.DLL.Service.Impelementation
 {
     public class CategoryService : ICategoryService
     {
-        private readonly ICategoryRepo categoryRepo;
-        public CategoryService(ICategoryRepo categoryRepo)
+        private readonly IUnitOfWork unitOfWork;
+        public CategoryService(IUnitOfWork unitOfWork)
         {
-            this.categoryRepo = categoryRepo;
+            this.unitOfWork = unitOfWork;
         }
         public Response<bool> addCategory(AddCategoryVM categoryVM)
         {
@@ -16,8 +16,13 @@ namespace MohamedSprint1V2.DLL.Service.Impelementation
                 if (categoryVM != null)
                 {
                     var category = new Category(0, categoryVM.Name, categoryVM.Description);
-                    var result = categoryRepo.AddCategory(category);
-                    return new Response<bool>(result, null, true);
+                        unitOfWork.Category.Add(category);
+                    var result = unitOfWork.Save();
+                    if(result>0)
+                    {
+                        return new Response<bool>(true, null, true);
+                    }
+                    return new Response<bool>(false,   "Category was not added", false);
                 }
                 return new Response<bool>(false, "Category is null", false);
 
@@ -31,14 +36,13 @@ namespace MohamedSprint1V2.DLL.Service.Impelementation
         {
             try
             {
-                var result = categoryRepo.DeleteCategory(categoryId);
-                if (result)
+                unitOfWork.Category.Delete(categoryId);
+                var result = unitOfWork.Save();
+                if (result > 0)
                 {
-                    return new Response<bool>(result, null, true);
+                    return new Response<bool>(true, null, true);
                 }
-                return new Response<bool>(result, "Category not found", false);
-
-
+                return new Response<bool>(false, "Category not found", false);
             }
             catch (Exception ex)
             {
@@ -49,7 +53,7 @@ namespace MohamedSprint1V2.DLL.Service.Impelementation
         {
             try
             {
-                var result = categoryRepo.getAll();
+                var result = unitOfWork.Category.getAll();
                 if (result != null)
                 {
                     List<GetallCategoryVM> mapp = new List<GetallCategoryVM>();
@@ -71,7 +75,7 @@ namespace MohamedSprint1V2.DLL.Service.Impelementation
         {
             try
             {
-                var result = categoryRepo.GetCategoryById(categoryId);
+                var result = unitOfWork.Category.GetById(categoryId);
                 if (result != null)
                 {
                     var mapp = new UpdaeteCategoryVM() { Id = result.Id, Name = result.Name, Description = result.Description };
@@ -93,11 +97,11 @@ namespace MohamedSprint1V2.DLL.Service.Impelementation
                     categoryVM.Name,
                     categoryVM.Description);
 
-                var result = categoryRepo.UpdateCategory(category);
+                unitOfWork.Category.Update(category);
+                var result = unitOfWork.Save();
 
-                if (result)
+                if (result > 0)
                     return new Response<bool>(true, null, true);
-
                 return new Response<bool>(false, "Failed to update category", false);
             }
             catch (Exception ex)
