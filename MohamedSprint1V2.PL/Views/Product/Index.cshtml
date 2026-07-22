@@ -112,6 +112,7 @@
         <thead>
 
             <tr>
+                <th>Id</th>
                 <th>Name</th>
                 <th>Description</th>
                 <th>Image</th>
@@ -129,7 +130,7 @@
                 @foreach (var item in Model.result)
                 {
                     <tr>
-
+                        <td>@item.id</td>
                         <td>@item.name</td>
 
                         <td>@item.description</td>
