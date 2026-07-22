@@ -131,6 +131,7 @@
     <table class="table-custom">
         <thead>
             <tr>
+                <th>Id</th>
                 <th>Name</th>
                 <th>Description</th>
                 <th>Date Created</th>
@@ -141,6 +142,7 @@
             @foreach (var item in Model.result)
             {
                 <tr>
+                    <td>@item.id</td>
                     <td>@item.name</td>
                     <td>@Html.Raw(item.description)</td>
                     <td>@item.CreatedTime.ToString("dd MMM yyyy")</td>

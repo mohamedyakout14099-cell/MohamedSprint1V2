@@ -13,10 +13,7 @@ namespace MohamedSprint1.DAL.Database
             
         }
 
-        //override protected void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        //{
-        //    optionsBuilder.UseSqlServer("Server=(localdb)\\MSSQLLocalDB;Database=MohamedSprint1V2;Trusted_Connection=True;TrustServerCertificate=True;");
-        //}
+    
         public DbSet<Category> Categories { get; set; }
         public DbSet<Product> Products { get; set; }
     }

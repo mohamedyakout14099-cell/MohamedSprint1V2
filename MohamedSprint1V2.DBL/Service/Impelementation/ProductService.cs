@@ -3,18 +3,19 @@ namespace MohamedSprint1V2.DLL.Service.Impelementation
 {
     public class ProductService : IProductService
     {
-        private readonly IProductRepo productRepo;
-        public ProductService(IProductRepo productRepo)
+        private readonly IUnitOfWork unitOfWork;
+        public ProductService(IUnitOfWork unitOfWork)
         {
-            this.productRepo = productRepo;
+            this.unitOfWork = unitOfWork;
         }
         public Response<bool> AddProduct(AddProductVM productVM)
         {
             try
             {
                 var product = new Product(productVM.Name,productVM.Description,productVM.Img,productVM.Price,productVM.CategoryId);
-                var result = productRepo.AddProduct(product);
-                if (result)
+                unitOfWork.Product.Add(product);
+                var result = unitOfWork.Save();
+                if (result > 0)
                 {
                     return new Response<bool>(true,"Product added successfully",true);
                 }
@@ -33,8 +34,9 @@ namespace MohamedSprint1V2.DLL.Service.Impelementation
         {
             try
             {
-                var result = productRepo.DeleteProduct(id);
-                if (result)
+                unitOfWork.Product.Delete(id);
+                var result = unitOfWork.Save();
+                if (result > 0)
                 {
                     return new Response<bool>(true, "Product deleted successfully", true);
                 }
@@ -42,7 +44,6 @@ namespace MohamedSprint1V2.DLL.Service.Impelementation
                 {
                     return new Response<bool>(false, "Failed to delete product", false);
                 }
-
             }
             catch (Exception ex)
             {
@@ -53,20 +54,13 @@ namespace MohamedSprint1V2.DLL.Service.Impelementation
         {
             try
             {
-                var result = productRepo.GetAllProducts();
+                var result = unitOfWork.Product.getAll();
 
                 if (result == null || result.Count == 0)
                 {
-                    return new Response<List<GetAllProductVM>>
-                    (
-                        null,
-                        "No Products Found",
-                        false
-                    );
+                    return new Response<List<GetAllProductVM>>(null,"No Products Found",false);
                 }
-
                 List<GetAllProductVM> mapp = new List<GetAllProductVM>();
-
                 foreach (var item in result)
                 {
                     mapp.Add(new GetAllProductVM()
@@ -79,29 +73,18 @@ namespace MohamedSprint1V2.DLL.Service.Impelementation
                         categoryId = item.CategoryId
                     });
                 }
-
-                return new Response<List<GetAllProductVM>>
-                (
-                    mapp,
-                    "Products retrieved successfully",
-                    true
-                );
+                return new Response<List<GetAllProductVM>>(mapp,"Products retrieved successfully",true);
             }
             catch (Exception ex)
             {
-                return new Response<List<GetAllProductVM>>
-                (
-                    null,
-                    $"An error occurred: {ex.Message}",
-                    false
-                );
+                return new Response<List<GetAllProductVM>>(null,$"An error occurred: {ex.Message}",false);
             }
         }
         public Response<UpdateProductVM> GetProductById(int id)
         {
             try
             {
-                var product = productRepo.GetProductById(id);
+                var product = unitOfWork.Product.GetById(id);
                 if (product != null)
                 {
                     var productVM = new UpdateProductVM
@@ -131,9 +114,21 @@ namespace MohamedSprint1V2.DLL.Service.Impelementation
 
             try
             {
-                var Product = new Product(productVM.Id, productVM.Name, productVM.Description, productVM.Img, productVM.Price, productVM.CategoryId);
-                var result = productRepo.UpdateProduct(Product);
-                if(result)
+                var Product = unitOfWork.Product.GetById(productVM.Id);
+                if (Product == null)
+                {
+                    return new Response<bool>(false, "Product not found", false);
+                }
+                Product.update(
+                    productVM.Name,
+                    productVM.Description,
+                    productVM.Img,
+                    productVM.Price,
+                    productVM.CategoryId
+                );
+                //unitOfWork.Product.Update(Product);
+                var result = unitOfWork.Save();
+                if(result > 0)
                 {
                     return new Response<bool>(true, "Product updated successfully", true);
                 }
