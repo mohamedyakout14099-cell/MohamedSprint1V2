@@ -1,0 +1,160 @@
+﻿@using MohamedSprint1V2.DLL.ModelVM.Category
+@using MohamedSprint1V2.DLL.ModelVM.ResponseResult
+@model Response<List<GetallCategoryVM>>
+
+    @* @model IEnumerable<Category> *@
+
+@* @{
+    ViewBag.PageTitle = "Category Management";
+    ViewBag.CardTitle = "View Categories";
+} *@
+
+<!-- Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+<style>
+    /* Card */
+    .custom-card {
+        background: #ffffff;
+        border-radius: 14px;
+        border: 1px solid #d0d7de;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+        padding: 20px;
+    }
+
+    .custom-card-header {
+        background: #f1f5fb;
+        border-bottom: 1px solid #d0d7de;
+        padding: 18px 0;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+        .custom-card-header h4 {
+            color: #1e3a8a; /* أزرق فخم */
+            font-weight: 700;
+            margin: 0;
+        }
+
+    /* Table */
+    .table-custom {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 10px;
+    }
+
+        .table-custom th {
+            background-color: #1e40af;
+            color: white;
+            font-weight: 600;
+            padding: 12px;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .table-custom td {
+            background-color: #fefefe;
+            padding: 12px;
+            color: #1e3a8a;
+            vertical-align: middle;
+            border-bottom: 1px solid #e2e8f0;
+            border-radius: 0;
+        }
+
+        .table-custom tr:hover td {
+            background-color: #e0ebff;
+            transition: 0.2s;
+        }
+
+    /* Buttons */
+    .btn-primary {
+        padding: 8px 18px;
+        border-radius: 8px;
+        font-weight: 600;
+        background-color: #1e40af;
+        color: white;
+        box-shadow: 0 4px 12px rgba(30,64,175,0.3);
+        border: none;
+    }
+
+        .btn-primary:hover {
+            background-color: #1e3a8a;
+            box-shadow: 0 6px 15px rgba(30,64,175,0.4);
+        }
+
+    .btn-success {
+        padding: 6px 14px;
+        border-radius: 8px;
+        background-color: #16a34a;
+        color: white;
+        font-weight: 600;
+        border: none;
+        box-shadow: 0 3px 10px rgba(22,163,74,0.3);
+    }
+
+        .btn-success:hover {
+            background-color: #15803d;
+            box-shadow: 0 4px 12px rgba(22,163,74,0.4);
+        }
+
+    .btn-danger {
+        padding: 6px 14px;
+        border-radius: 8px;
+        background-color: #dc2626;
+        color: white;
+        font-weight: 600;
+        border: none;
+        box-shadow: 0 3px 10px rgba(220,38,38,0.3);
+    }
+
+        .btn-danger:hover {
+            background-color: #b91c1c;
+            box-shadow: 0 4px 12px rgba(220,38,38,0.4);
+        }
+
+    .top-btn {
+        margin-bottom: 15px;
+    }
+</style>
+
+<div class="custom-card">
+
+    <div class="custom-card-header">
+        <h4><i class="fa-solid fa-folder-open me-2"></i> @ViewBag.CardTitle</h4>
+    </div>
+
+    <div class="top-btn">
+        <a class="btn btn-primary" href="/Category/Create">
+            <i class="fa-solid fa-circle-plus me-1"></i> Create Category
+        </a>
+    </div>
+
+    <table class="table-custom">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Date Created</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.result)
+            {
+                <tr>
+                    <td>@item.name</td>
+                    <td>@Html.Raw(item.description)</td>
+                    <td>@item.CreatedTime.ToString("dd MMM yyyy")</td>
+                    <td>
+                        <a class="btn btn-success me-1" href="/Category/Edit/@item.id">
+                            <i class="fa-solid fa-pen-to-square"></i> Edit
+                        </a>
+                        <a class="btn btn-danger" href="/Category/Delete/@item.id">
+                            <i class="fa-solid fa-trash"></i> Delete
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+</div>

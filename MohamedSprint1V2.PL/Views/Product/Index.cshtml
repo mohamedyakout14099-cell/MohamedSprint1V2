@@ -1,0 +1,182 @@
+﻿```cshtml
+@using MohamedSprint1V2.DLL.ModelVM.Product
+@using MohamedSprint1V2.DLL.ModelVM.ResponseResult
+@model Response<List<GetAllProductVM>>
+
+@{
+    ViewBag.PageTitle = "Products Management";
+    ViewBag.CardTitle = "Products List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+<style>
+    .custom-card {
+        background: rgba(255,255,255,.75);
+        backdrop-filter: blur(12px);
+        border-radius: 18px;
+        border: 1px solid rgba(160,173,186,.35);
+        box-shadow: 0 15px 35px rgba(0,0,0,.12);
+        padding: 28px;
+        animation: fadeIn .4s ease;
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(8px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .custom-card-title {
+        background: linear-gradient(135deg,#1e3a8a,#3b82f6);
+        padding: 18px;
+        border-radius: 14px;
+        margin-bottom: 22px;
+        text-align: center;
+        color: white;
+        font-weight: 700;
+        font-size: 22px;
+    }
+
+    .top-btn {
+        margin-bottom: 18px;
+        text-align: right;
+    }
+
+    .btn-primary {
+        padding: 10px 22px;
+        border-radius: 10px;
+        font-weight: 600;
+    }
+
+    table thead th {
+        background: #1e40af;
+        color: white;
+        text-align: center;
+    }
+
+    table tbody td {
+        vertical-align: middle;
+        text-align: center;
+    }
+
+    .action-btn {
+        margin: 2px;
+    }
+
+    img {
+        width: 80px;
+        height: 80px;
+        object-fit: contain;
+        border-radius: 6px;
+    }
+</style>
+
+<div class="custom-card">
+
+    <div class="custom-card-title">
+        <i class="fa-solid fa-box-open me-2"></i>
+        Products List
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">
+            @TempData["ErrorMessage"]
+        </div>
+    }
+
+    <div class="top-btn">
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="fa-solid fa-circle-plus"></i>
+            Create Product
+        </a>
+    </div>
+
+    <table class="table table-bordered table-hover">
+
+        <thead>
+
+            <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Image</th>
+                <th>Price</th>
+                <th>Category Id</th>
+                <th style="width:170px;">Actions</th>
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            @if (Model.result != null && Model.result.Count > 0)
+            {
+                @foreach (var item in Model.result)
+                {
+                    <tr>
+
+                        <td>@item.name</td>
+
+                        <td>@item.description</td>
+
+                        <td>
+                            <img src="@item.img" alt="Product Image" />
+                        </td>
+
+                        <td>@item.price</td>
+
+                        <td>@item.categoryId</td>
+
+                        <td>
+
+                            <a asp-action="Edit"
+                               asp-route-id="@item.id"
+                               class="btn btn-warning btn-sm action-btn">
+                                <i class="fa-solid fa-pen"></i>
+                                Edit
+                            </a>
+
+                            <a asp-action="Delete"
+                               asp-route-id="@item.id"
+                               class="btn btn-danger btn-sm action-btn">
+                                <i class="fa-solid fa-trash"></i>
+                                Delete
+                            </a>
+
+                        </td>
+
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+
+                    <td colspan="6" class="text-center text-danger">
+                        No Products Found
+                    </td>
+
+                </tr>
+            }
+
+        </tbody>
+
+    </table>
+
+</div>
+```

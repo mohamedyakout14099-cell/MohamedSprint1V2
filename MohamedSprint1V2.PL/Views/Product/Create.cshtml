@@ -1,0 +1,161 @@
+﻿@using MohamedSprint1V2.DLL.ModelVM.Product
+@model AddProductVM
+
+@{
+    ViewBag.PageTitle = "Product Management";
+    ViewBag.CardTitle = "Create Product";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+<style>
+    .custom-card {
+        background: #ffffff;
+        border-radius: 14px;
+        border: 1px solid #d0d7de;
+        box-shadow: 0 10px 30px rgba(0,0,0,.12);
+        padding: 24px;
+    }
+
+    .custom-card-header {
+        background: #f1f5fb;
+        border-bottom: 1px solid #d0d7de;
+        padding: 18px 0;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+        .custom-card-header h4 {
+            color: #1e3a8a;
+            font-weight: 700;
+            margin: 0;
+        }
+
+    .form-control,
+    textarea {
+        background: #fff;
+        border: 1px solid #a0aec0;
+        border-radius: 8px;
+        padding: 10px 14px;
+        color: #1e3a8a;
+    }
+
+        .form-control:focus,
+        textarea:focus {
+            border-color: #1e40af;
+            box-shadow: 0 0 0 .2rem rgba(59,130,246,.25);
+        }
+
+    .form-label {
+        font-weight: 600;
+        color: #1e3a8a;
+    }
+
+    .btn-primary {
+        background: #1e40af;
+        border: none;
+        padding: 10px 22px;
+        border-radius: 8px;
+    }
+
+        .btn-primary:hover {
+            background: #1e3a8a;
+        }
+
+    #ImagePreview {
+        width: 250px;
+        height: 250px;
+        object-fit: contain;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+    }
+</style>
+
+<div class="row justify-content-center">
+
+    <div class="col-md-8">
+
+        <div class="custom-card">
+
+            <div class="custom-card-header">
+                <h4>
+                    <i class="fa-solid fa-box me-2"></i>
+                    @ViewBag.CardTitle
+                </h4>
+            </div>
+
+            <form asp-action="Create" method="post">
+
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <div class="mb-3">
+                    <label asp-for="Name" class="form-label"></label>
+                    <input asp-for="Name" class="form-control" />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Description" class="form-label"></label>
+                    <textarea asp-for="Description" rows="4" class="form-control"></textarea>
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Price" class="form-label"></label>
+                    <input asp-for="Price" class="form-control" />
+                    <span asp-validation-for="Price" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Img" class="form-label"></label>
+                    <input asp-for="Img" class="form-control" id="imgfile" oninput="previewImage()" />
+                    <span asp-validation-for="Img" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="CategoryId" class="form-label"></label>
+                    <input asp-for="CategoryId" class="form-control" />
+                    <span asp-validation-for="CategoryId" class="text-danger"></span>
+                </div>
+
+                <div class="d-flex justify-content-between">
+
+                    <a asp-action="Index" class="btn btn-outline-secondary">
+                        Back
+                    </a>
+
+                    <button type="submit" class="btn btn-primary">
+                        Create Product
+                    </button>
+
+                </div>
+
+            </form>
+
+            <div class="text-center mt-4">
+                <img id="ImagePreview" />
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts {
+
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+
+    <script>
+
+        function previewImage(){
+
+            var img=document.getElementById("ImagePreview");
+            img.src=document.getElementById("imgfile").value;
+
+        }
+
+    </script>
+
+}

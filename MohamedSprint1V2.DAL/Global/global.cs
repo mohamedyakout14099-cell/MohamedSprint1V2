@@ -1,0 +1,10 @@
+﻿global using System.ComponentModel.DataAnnotations.Schema;
+global using MohamedSprint1V2.DAL.EntityClasses;
+global using System.ComponentModel.DataAnnotations;
+global using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+global using System.ComponentModel;
+global using MohamedSprint1V2.DAL.Entity;
+global using Microsoft.EntityFrameworkCore;
+global using MohamedSprint1V2.DAL.Repo.Abstraction;
+global using System.Linq.Expressions;
+global using MohamedSprint1.DAL.Database;

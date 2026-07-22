@@ -1,0 +1,136 @@
+﻿@using MohamedSprint1V2.DLL.ModelVM.Category
+@model UpdaeteCategoryVM
+
+@{
+    ViewBag.PageTitle = "Category Management";
+    ViewBag.CardTitle = "Edit Category";
+}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+<style>
+    .custom-card {
+        background: #ffffff;
+        border-radius: 14px;
+        border: 1px solid #d0d7de;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+    }
+
+    .custom-card-header {
+        background: #f1f5fb;
+        border-bottom: 1px solid #d0d7de;
+        padding: 18px 0;
+        text-align: center;
+    }
+
+    .custom-card-header h4 {
+        color: #1e3a8a;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .form-control,
+    textarea {
+        background-color: #fefefe;
+        border: 1px solid #a0aec0;
+        border-radius: 8px;
+        padding: 10px 14px;
+        color: #1e3a8a;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    .form-control:focus,
+    textarea:focus {
+        border-color: #1e40af;
+        box-shadow: 0 0 0 .2rem rgba(59,130,246,.25);
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #1e3a8a;
+    }
+
+    .btn-primary {
+        padding: 9px 20px;
+        border-radius: 8px;
+        background-color: #1e40af;
+        border: none;
+    }
+
+    .btn-outline-secondary {
+        border-radius: 8px;
+    }
+</style>
+
+<div class="row justify-content-center">
+    <div class="col-md-7">
+        <div class="custom-card">
+
+            <div class="custom-card-header">
+                <h4>
+                    <i class="fa-solid fa-pen-to-square me-2"></i>
+                    @ViewBag.CardTitle
+                </h4>
+            </div>
+
+            <div class="card-body p-4">
+
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="alert alert-danger">
+                        @TempData["ErrorMessage"]
+                    </div>
+                }
+
+                <form asp-action="Edit" method="post">
+
+                    <input asp-for="Id" type="hidden"/>
+
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="Name" class="form-label"></label>
+
+                        <input asp-for="Name"
+                               class="form-control"
+                               placeholder="Enter category name..." />
+
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="Description" class="form-label"></label>
+
+                        <textarea asp-for="Description"
+                                  rows="4"
+                                  class="form-control"
+                                  placeholder="Enter description..."></textarea>
+
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+
+                        <a asp-action="Index" class="btn btn-outline-secondary">
+                            <i class="fa-solid fa-arrow-left me-1"></i>
+                            Back
+                        </a>
+
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fa-solid fa-floppy-disk me-1"></i>
+                            Save Changes
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <partial name="_ValidationScriptsPartial"/>
+}

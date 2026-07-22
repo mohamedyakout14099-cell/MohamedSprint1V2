@@ -1,0 +1,153 @@
+﻿@* @model MohamedSprint1V2.DLL.ModelVM.Product.UpdateProductVM
+@{
+    ViewBag.PageTitle = "Product Management";
+    ViewBag.CardTitle = "Edit Product";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+<style>
+    .card {
+        border-radius: 15px;
+        box-shadow: 0 4px 12px rgba(0,0,0,.15);
+    }
+    .form-control {
+        border-radius: 10px;
+    }
+    .btn {
+        border-radius: 10px;
+    }
+    .validation-summary-errors {
+        color: red;
+        margin-bottom: 15px;
+    }
+    .field-validation-error {
+        color: red;
+        font-size: 14px;
+    }
+</style>
+
+<div class="container mt-4">
+
+    <div class="card">
+        <div class="card-header bg-warning text-dark">
+            <h3><i class="fas fa-edit"></i> Edit Product</h3>
+        </div>
+
+        <div class="card-body">
+
+            <form asp-action="Edit" method="post">
+
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <!-- Hidden Id -->
+                <input asp-for="Id" type="hidden" />
+
+                <div class="mb-3">
+                    <label asp-for="Name" class="form-label"></label>
+                    <input asp-for="Name" class="form-control" />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Description" class="form-label"></label>
+                    <textarea asp-for="Description" rows="4" class="form-control"></textarea>
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Img" class="form-label"></label>
+                    <input asp-for="Img" class="form-control" />
+                    <span asp-validation-for="Img" class="text-danger"></span>
+                </div>
+
+                @if (!string.IsNullOrEmpty(Model.Img))
+                {
+                    <div class="mb-3">
+                        <img src="@Model.Img"
+                             width="180"
+                             class="img-thumbnail"
+                             alt="Product Image" />
+                    </div>
+                }
+
+                <div class="mb-3">
+                    <label asp-for="Price" class="form-label"></label>
+                    <input asp-for="Price" class="form-control" />
+                    <span asp-validation-for="Price" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="CategoryId" class="form-label"></label>
+                    <input asp-for="CategoryId" class="form-control" />
+                    <span asp-validation-for="CategoryId" class="text-danger"></span>
+                </div>
+
+                <button type="submit" class="btn btn-warning">
+                    <i class="fas fa-save"></i> Save Changes
+                </button>
+
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back
+                </a>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>
+
+@section Scripts
+{
+    <partial name="_ValidationScriptsPartial" />
+} *@
+@model MohamedSprint1V2.DLL.ModelVM.Product.UpdateProductVM
+
+@{
+    ViewData["Title"] = "Test Create Product";
+}
+
+<h2>Test Create Product</h2>
+
+<form asp-action="Edit" asp-controller="Product" method="post">
+
+    <div class="mb-3">
+        <label asp-for="Name"></label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Description"></label>
+        <input asp-for="Description" class="form-control" />
+        <span asp-validation-for="Description" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Price"></label>
+        <input asp-for="Price" class="form-control" />
+        <span asp-validation-for="Price" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Img"></label>
+        <input asp-for="Img" class="form-control" />
+        <span asp-validation-for="Img" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="CategoryId"></label>
+        <input asp-for="CategoryId" type="number" class="form-control" />
+        <span asp-validation-for="CategoryId" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">
+        Submit
+    </button>
+
+</form>
+
+@section Scripts
+{
+    <partial name="_ValidationScriptsPartial" />
+}
