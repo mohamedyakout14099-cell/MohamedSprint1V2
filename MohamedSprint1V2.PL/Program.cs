@@ -25,7 +25,7 @@ builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 {
-    options.Password.RequiredLength = 6;
+    options.Password.RequiredLength = 3;
     options.Password.RequireDigit = false;
     options.Password.RequireUppercase = false;
     options.Password.RequireNonAlphanumeric = false;

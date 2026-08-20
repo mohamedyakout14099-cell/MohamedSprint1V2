@@ -1,23 +1,28 @@
-﻿using System.ComponentModel.DataAnnotations;namespace MohamedSprint1V2.DAL.Entity
+using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Identity;
+
+namespace MohamedSprint1V2.DAL.Entity
 {
-    public class ApplicationUser:IdentityUser
+    public class ApplicationUser : IdentityUser
     {
         public ApplicationUser()
         {
-            
         }
-        public ApplicationUser(string name , string address, string city, string UsarName)
+
+        public ApplicationUser(string name, string? address, string? city, string userName, string email)
         {
             Name = name;
             Address = address;
             City = city;
-            UserName = name; // تعيين Name إلى UserName
-            Email = $"{name}@example.com"; // تعيين email افتراضي
+            UserName = userName;
+            Email = email;
         }
 
         [Required]
-        public string Name { get;private set; }
-        public string Address { get; private set; }
-        public string City { get; private set; }
+        public string Name { get; set; } = string.Empty;
+
+        public string? Address { get; set; }
+
+        public string? City { get; set; }
     }
 }
