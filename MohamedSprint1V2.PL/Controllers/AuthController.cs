@@ -1,7 +1,7 @@
 ﻿ using Microsoft.AspNetCore.Mvc;
 using MohamedSprint1V2.DLL.ModelVM.Identity;
 using MohamedSprint1V2.DLL.Service.Abstraction;
-
+using MohamedSprint1V2.DLL.ModelVM.Identity;
 namespace MohamedSprint1V2.PL.Controllers
 {
     public class AuthController : Controller
@@ -36,6 +36,22 @@ namespace MohamedSprint1V2.PL.Controllers
                 return View(registerVM);
             }
         }
-         
+        [HttpGet]
+        public IActionResult Login()
+        {
+            return View();
+        }
+        [HttpPost]
+        public async Task<IActionResult> Login(LoginVm loginVm)
+        {
+            var result = await _authService.Login(loginVm);
+            if (result.Successornot) 
+            {
+                return RedirectToAction("index","Product");
+            }
+            return View(loginVm);
+
+        }
+
     }
 }

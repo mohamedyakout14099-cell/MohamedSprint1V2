@@ -13,7 +13,7 @@ namespace MohamedSprint1V2.DAL.Database
         {
             
         }
-
+        
     
         public DbSet<Category> Categories { get; set; }
         public DbSet<Product> Products { get; set; }

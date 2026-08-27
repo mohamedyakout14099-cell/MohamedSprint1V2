@@ -8,5 +8,6 @@ namespace MohamedSprint1V2.DLL.Service.Abstraction
     public interface IAuthService
     {
         Task<Response<bool>> Register(RegisterVM registerVM);
+        Task<Response<bool>> Login(LoginVm loginVm);
     }
 }

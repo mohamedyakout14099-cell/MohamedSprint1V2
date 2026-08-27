@@ -9,24 +9,36 @@ namespace MohamedSprint1V2.DAL.Repo.Impelementation
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly RoleManager<IdentityRole> _roleManager;
-        public UserRepo(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, RoleManager<IdentityRole> roleManager)
+        public UserRepo(UserManager<ApplicationUser> userManager,
+            SignInManager<ApplicationUser> signInManager,
+            RoleManager<IdentityRole> roleManager)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _roleManager = roleManager;
         }
 
-        //public Task<bool> LoginUserAsync(string username, string password)
-        //{
-        //    throw new NotImplementedException();
-        //}
+        public async Task<bool> LoginUserAsync(
+             string userName,
+             string password,
+             bool RememberMe)
+        {
+            var result = await _signInManager.PasswordSignInAsync(
+                userName,
+                password,
+                RememberMe,
+                false);
+ 
+            return result.Succeeded;
+        }
 
-        //public Task<bool> LogoutUserAsync(string username)
-        //{
-        //    throw new NotImplementedException();
-        //}
+        public async Task LogoutUserAsync()
+        {
+            await _signInManager.SignOutAsync();
+        }
 
-      
+     
+
         public async Task<bool> RegisterUserAsync(ApplicationUser user, string password)
         {
             //user.UserName = user.Email;
@@ -36,6 +48,7 @@ namespace MohamedSprint1V2.DAL.Repo.Impelementation
             {
                 foreach (var error in result.Errors)
                 {
+                    Console.WriteLine($"Error: {error.Code}");
                     Console.WriteLine($"Error: {error.Description}");
                 }
                 return false;
@@ -50,5 +63,7 @@ namespace MohamedSprint1V2.DAL.Repo.Impelementation
 
             return result.Succeeded;
         }
+
+      
     }
 }

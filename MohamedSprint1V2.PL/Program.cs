@@ -32,6 +32,7 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
     options.Password.RequireLowercase = false;
 })
     .AddEntityFrameworkStores<MohamedSprint1V2DbContext>().AddDefaultTokenProviders();
+    
 builder.Services.AddScoped<IAuthService, AuthService >();
 builder.Services.AddScoped<IUserRepo, UserRepo>();
 var app = builder.Build();

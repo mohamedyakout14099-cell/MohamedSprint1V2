@@ -14,6 +14,17 @@ namespace MohamedSprint1V2.DLL.Service.Impelementation
             _userRepo = userRepo;
         }
 
+        public async Task<Response<bool>> Login(LoginVm loginVm)
+        {
+            var result=await _userRepo.LoginUserAsync(loginVm.Email, loginVm.Password, loginVm.RememberMe);
+            if (result)
+            {
+                return new Response<bool>(true, "User Loeged in successfully.", true);
+
+            }
+                return new Response<bool>(false, "Failed to Log in user.", false);
+        }
+
         public async Task<Response<bool>> Register(RegisterVM registerVM)
         {
             try
