@@ -51,6 +51,11 @@ namespace MohamedSprint1V2.DLL.Service.Impelementation
                 return new Response<bool>(false, ex.Message, false);
             }
         }
+
+        public async Task Logout()
+        {
+            await _userRepo.LogoutUserAsync();
+        }
     }
 }
 

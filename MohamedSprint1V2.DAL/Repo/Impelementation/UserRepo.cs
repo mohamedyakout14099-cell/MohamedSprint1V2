@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -23,8 +23,16 @@ namespace MohamedSprint1V2.DAL.Repo.Impelementation
              string password,
              bool RememberMe)
         {
+            var user = await _userManager.FindByNameAsync(userName)
+                       ?? await _userManager.FindByEmailAsync(userName);
+
+            if (user == null || string.IsNullOrEmpty(user.UserName))
+            {
+                return false;
+            }
+
             var result = await _signInManager.PasswordSignInAsync(
-                userName,
+                user.UserName,
                 password,
                 RememberMe,
                 false);

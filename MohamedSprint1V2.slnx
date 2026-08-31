@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="MohamedSprint1V2.DAL/MohamedSprint1V2.DAL.csproj" />
+  <Project Path="MohamedSprint1V2.DBL/MohamedSprint1V2.DLL.csproj" />
+  <Project Path="MohamedSprint1V2.PL/MohamedSprint1V2.PL.csproj" />
+</Solution>

@@ -18,6 +18,7 @@ builder.Services.AddDbContext<MohamedSprint1V2DbContext>(options =>
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddRazorPages();
 builder.Services.AddScoped<ICategoryRepo, CategoryRepo>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IProductRepo, ProductRepo>();
@@ -31,7 +32,9 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
     options.Password.RequireNonAlphanumeric = false;
     options.Password.RequireLowercase = false;
 })
-    .AddEntityFrameworkStores<MohamedSprint1V2DbContext>().AddDefaultTokenProviders();
+    .AddEntityFrameworkStores<MohamedSprint1V2DbContext>()
+    .AddDefaultTokenProviders()
+    .AddDefaultUI();
     
 builder.Services.AddScoped<IAuthService, AuthService >();
 builder.Services.AddScoped<IUserRepo, UserRepo>();
@@ -57,5 +60,6 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
 
+app.MapRazorPages();
 
 app.Run();  
