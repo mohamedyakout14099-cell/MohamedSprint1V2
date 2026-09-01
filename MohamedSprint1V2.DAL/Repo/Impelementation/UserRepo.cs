@@ -30,7 +30,7 @@ namespace MohamedSprint1V2.DAL.Repo.Impelementation
             var user = await _userManager.FindByEmailAsync(userName)
                        ?? await _userManager.FindByNameAsync(userName);
 
-            if (user == null || string.IsNullOrEmpty(user.UserName))
+            if (user == null || string.IsNullOrEmpty(user.UserName) || user.IsDeleted)
             {
                 return false;
             }
@@ -48,8 +48,6 @@ namespace MohamedSprint1V2.DAL.Repo.Impelementation
         {
             await _signInManager.SignOutAsync();
         }
-
-     
 
         public async Task<bool> RegisterUserAsync(ApplicationUser user, string password)
         {
@@ -74,6 +72,60 @@ namespace MohamedSprint1V2.DAL.Repo.Impelementation
             await _userManager.AddToRoleAsync(user, "User");
 
             return result.Succeeded;
+        }
+
+        public async Task<bool> SoftDeleteUserAsync(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null) return false;
+
+            user.IsDeleted = true;
+            var result = await _userManager.UpdateAsync(user);
+            return result.Succeeded;
+        }
+
+        public async Task<bool> RestoreUserAsync(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null) return false;
+
+            user.IsDeleted = false;
+            var result = await _userManager.UpdateAsync(user);
+            return result.Succeeded;
+        }
+
+        public async Task<bool> MakeAdminAsync(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null) return false;
+
+            if (!await _roleManager.RoleExistsAsync("Admin"))
+            {
+                await _roleManager.CreateAsync(new IdentityRole("Admin"));
+            }
+
+            var currentRoles = await _userManager.GetRolesAsync(user);
+            if (currentRoles.Contains("User"))
+            {
+                await _userManager.RemoveFromRoleAsync(user, "User");
+            }
+
+            if (!currentRoles.Contains("Admin"))
+            {
+                var addResult = await _userManager.AddToRoleAsync(user, "Admin");
+                return addResult.Succeeded;
+            }
+
+            return true;
+        }
+
+        public async Task<string> GetUserRoleAsync(ApplicationUser user)
+        {
+            var roles = await _userManager.GetRolesAsync(user);
+            if (roles.Contains("Manager")) return "Manager";
+            if (roles.Contains("Admin")) return "Admin";
+            if (roles.Contains("User")) return "User";
+            return roles.FirstOrDefault() ?? "User";
         }
 
       

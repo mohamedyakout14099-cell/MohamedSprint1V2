@@ -14,12 +14,63 @@ namespace MohamedSprint1V2.PL.Controllers
             _authService = authService;
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Manager,Admin")]
         [HttpGet]
         public async Task<IActionResult> Index()
         {
             var users = await _authService.GetAllUSers();
             return View(users);
+        }
+
+        [Authorize(Roles = "Manager")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> MakeAdmin(string userId)
+        {
+            var result = await _authService.MakeAdmin(userId);
+            if (result.Successornot)
+            {
+                TempData["SuccessMessage"] = "User successfully promoted to Admin.";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = result.Message ?? "Failed to promote user to Admin.";
+            }
+            return RedirectToAction(nameof(Index));
+        }
+
+        [Authorize(Roles = "Manager,Admin")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SoftDelete(string userId)
+        {
+            var result = await _authService.SoftDeleteUser(userId);
+            if (result.Successornot)
+            {
+                TempData["SuccessMessage"] = "User account deactivated (soft-deleted).";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = result.Message ?? "Failed to deactivate user.";
+            }
+            return RedirectToAction(nameof(Index));
+        }
+
+        [Authorize(Roles = "Manager,Admin")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Restore(string userId)
+        {
+            var result = await _authService.RestoreUser(userId);
+            if (result.Successornot)
+            {
+                TempData["SuccessMessage"] = "User account restored successfully.";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = result.Message ?? "Failed to restore user.";
+            }
+            return RedirectToAction(nameof(Index));
         }
 
         
@@ -61,14 +112,16 @@ namespace MohamedSprint1V2.PL.Controllers
         }
 
         [HttpGet]
-        public IActionResult Login()
+        public IActionResult Login(string? returnUrl = null)
         {
+            ViewData["ReturnUrl"] = returnUrl;
             return View();
         }
 
         [HttpPost]
-        public async Task<IActionResult> Login(LoginVm loginVm)
+        public async Task<IActionResult> Login(LoginVm loginVm, string? returnUrl = null)
         {
+            ViewData["ReturnUrl"] = returnUrl;
             if (!ModelState.IsValid)
             {
                 return View(loginVm);
@@ -77,15 +130,29 @@ namespace MohamedSprint1V2.PL.Controllers
             var result = await _authService.Login(loginVm);
             if (result.Successornot) 
             {
-                if(loginVm.UserName == "admin")
+                if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+                {
+                    return Redirect(returnUrl);
+                }
+
+                var normalizedInput = (loginVm.Email ?? "").Trim().ToLower();
+                if (normalizedInput == "admin" || normalizedInput == "admin@admin.com" || 
+                    normalizedInput == "manager" || normalizedInput == "manager@manager.com")
+                {
                     return RedirectToAction("Index", "Auth");
-                else
-                    return RedirectToAction("Index", "Product");
-         
+                }
+
+                return RedirectToAction("Index", "Product");
             }
 
             ModelState.AddModelError(string.Empty, result.Message ?? "Invalid login attempt.");
             return View(loginVm);
+        }
+
+        [HttpGet]
+        public IActionResult AccessDenied()
+        {
+            return View();
         }
 
         [HttpPost]

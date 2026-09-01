@@ -1,153 +1,210 @@
-﻿@* @model MohamedSprint1V2.DLL.ModelVM.Product.UpdateProductVM
+@using MohamedSprint1V2.DLL.ModelVM.Product
+@model UpdateProductVM
+
 @{
-    ViewBag.PageTitle = "Product Management";
-    ViewBag.CardTitle = "Edit Product";
+    ViewData["Title"] = "Edit Product";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
+
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
 <style>
-    .card {
-        border-radius: 15px;
-        box-shadow: 0 4px 12px rgba(0,0,0,.15);
+    .custom-card {
+        background: #ffffff;
+        border-radius: 16px;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+        overflow: hidden;
+        animation: fadeIn 0.4s ease;
     }
-    .form-control {
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(8px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .custom-card-header {
+        background: linear-gradient(135deg, #d97706, #f59e0b);
+        padding: 20px 24px;
+        color: white;
+    }
+
+    .custom-card-header h4 {
+        margin: 0;
+        font-weight: 700;
+        font-size: 1.35rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .form-control, textarea {
         border-radius: 10px;
+        padding: 10px 14px;
+        border: 1px solid #d1d5db;
+        transition: all 0.2s ease;
     }
-    .btn {
-        border-radius: 10px;
+
+    .form-control:focus, textarea:focus {
+        border-color: #f59e0b;
+        box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
     }
-    .validation-summary-errors {
-        color: red;
-        margin-bottom: 15px;
+
+    .form-label {
+        font-weight: 600;
+        color: #92400e;
+        margin-bottom: 6px;
     }
-    .field-validation-error {
-        color: red;
-        font-size: 14px;
+
+    .preview-container {
+        border: 2px dashed #cbd5e1;
+        border-radius: 12px;
+        padding: 15px;
+        text-align: center;
+        background: #f8fafc;
+        min-height: 160px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+    }
+
+    .preview-img {
+        max-width: 100%;
+        max-height: 180px;
+        object-fit: contain;
+        border-radius: 8px;
     }
 </style>
 
-<div class="container mt-4">
+<div class="row justify-content-center my-4">
+    <div class="col-lg-8 col-md-10">
+        <div class="custom-card">
+            <!-- Header -->
+            <div class="custom-card-header">
+                <h4>
+                    <i class="fa-solid fa-pen-to-square"></i>
+                    Edit Product #@Model.Id
+                </h4>
+                <small class="text-white-50">Update product specifications, price, or category</small>
+            </div>
 
-    <div class="card">
-        <div class="card-header bg-warning text-dark">
-            <h3><i class="fas fa-edit"></i> Edit Product</h3>
-        </div>
+            <!-- Form Body -->
+            <div class="p-4">
+                <form asp-action="Edit" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="Id" />
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
 
-        <div class="card-body">
+                    <div class="row g-3">
+                        <!-- Name -->
+                        <div class="col-md-12">
+                            <label asp-for="Name" class="form-label">
+                                <i class="fa-solid fa-tag text-warning me-1"></i> Product Name <span class="text-danger">*</span>
+                            </label>
+                            <input asp-for="Name" class="form-control" placeholder="Enter product name" />
+                            <span asp-validation-for="Name" class="text-danger small"></span>
+                        </div>
 
-            <form asp-action="Edit" method="post">
+                        <!-- Description -->
+                        <div class="col-md-12">
+                            <label asp-for="Description" class="form-label">
+                                <i class="fa-solid fa-align-left text-warning me-1"></i> Description <span class="text-danger">*</span>
+                            </label>
+                            <textarea asp-for="Description" rows="3" class="form-control" placeholder="Enter full product description..."></textarea>
+                            <span asp-validation-for="Description" class="text-danger small"></span>
+                        </div>
 
-                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <!-- Price -->
+                        <div class="col-md-6">
+                            <label asp-for="Price" class="form-label">
+                                <i class="fa-solid fa-dollar-sign text-warning me-1"></i> Price (EGP) <span class="text-danger">*</span>
+                            </label>
+                            <input asp-for="Price" type="number" step="0.01" class="form-control" placeholder="0.00" />
+                            <span asp-validation-for="Price" class="text-danger small"></span>
+                        </div>
 
-                <!-- Hidden Id -->
-                <input asp-for="Id" type="hidden" />
+                        <!-- Category ID -->
+                        <div class="col-md-6">
+                            <label asp-for="CategoryId" class="form-label">
+                                <i class="fa-solid fa-folder text-warning me-1"></i> Category ID <span class="text-danger">*</span>
+                            </label>
+                            <input asp-for="CategoryId" type="number" class="form-control" placeholder="e.g. 1" />
+                            <span asp-validation-for="CategoryId" class="text-danger small"></span>
+                        </div>
 
-                <div class="mb-3">
-                    <label asp-for="Name" class="form-label"></label>
-                    <input asp-for="Name" class="form-control" />
-                    <span asp-validation-for="Name" class="text-danger"></span>
-                </div>
+                        <!-- Image URL -->
+                        <div class="col-md-12">
+                            <label asp-for="Img" class="form-label">
+                                <i class="fa-solid fa-image text-warning me-1"></i> Product Image URL <span class="text-danger">*</span>
+                            </label>
+                            <input asp-for="Img" class="form-control" id="productImgInput" placeholder="https://example.com/image.jpg" />
+                            <span asp-validation-for="Img" class="text-danger small"></span>
+                        </div>
 
-                <div class="mb-3">
-                    <label asp-for="Description" class="form-label"></label>
-                    <textarea asp-for="Description" rows="4" class="form-control"></textarea>
-                    <span asp-validation-for="Description" class="text-danger"></span>
-                </div>
+                        <!-- Live Image Preview -->
+                        <div class="col-md-12">
+                            <label class="form-label text-muted small">Current / Updated Image Preview</label>
+                            <div class="preview-container" id="previewContainer">
+                                <i class="fa-regular fa-image text-muted fs-1 mb-2 @(!string.IsNullOrEmpty(Model.Img) ? "d-none" : "")" id="placeholderIcon"></i>
+                                <span class="text-muted small @(!string.IsNullOrEmpty(Model.Img) ? "d-none" : "")" id="placeholderText">Image preview will appear here</span>
+                                <img id="livePreviewImg" src="@Model.Img" class="preview-img shadow-sm @(string.IsNullOrEmpty(Model.Img) ? "d-none" : "")" alt="Preview" />
+                            </div>
+                        </div>
 
-                <div class="mb-3">
-                    <label asp-for="Img" class="form-label"></label>
-                    <input asp-for="Img" class="form-control" />
-                    <span asp-validation-for="Img" class="text-danger"></span>
-                </div>
-
-                @if (!string.IsNullOrEmpty(Model.Img))
-                {
-                    <div class="mb-3">
-                        <img src="@Model.Img"
-                             width="180"
-                             class="img-thumbnail"
-                             alt="Product Image" />
+                        <!-- Action Buttons -->
+                        <div class="col-12 mt-4 d-flex justify-content-between">
+                            <a asp-action="Index" class="btn btn-outline-secondary px-4 py-2" style="border-radius: 10px;">
+                                <i class="fa-solid fa-arrow-left me-1"></i> Back to List
+                            </a>
+                            <button type="submit" class="btn btn-warning px-4 py-2 shadow-sm text-dark fw-bold" style="border-radius: 10px;">
+                                <i class="fa-solid fa-floppy-disk me-1"></i> Save Changes
+                            </button>
+                        </div>
                     </div>
-                }
-
-                <div class="mb-3">
-                    <label asp-for="Price" class="form-label"></label>
-                    <input asp-for="Price" class="form-control" />
-                    <span asp-validation-for="Price" class="text-danger"></span>
-                </div>
-
-                <div class="mb-3">
-                    <label asp-for="CategoryId" class="form-label"></label>
-                    <input asp-for="CategoryId" class="form-control" />
-                    <span asp-validation-for="CategoryId" class="text-danger"></span>
-                </div>
-
-                <button type="submit" class="btn btn-warning">
-                    <i class="fas fa-save"></i> Save Changes
-                </button>
-
-                <a asp-action="Index" class="btn btn-secondary">
-                    <i class="fas fa-arrow-left"></i> Back
-                </a>
-
-            </form>
-
+                </form>
+            </div>
         </div>
     </div>
-
 </div>
 
-@section Scripts
-{
+@section Scripts {
     <partial name="_ValidationScriptsPartial" />
-} *@
-@model MohamedSprint1V2.DLL.ModelVM.Product.UpdateProductVM
+    <script>
+        const imgInput = document.getElementById('productImgInput');
+        const previewImg = document.getElementById('livePreviewImg');
+        const icon = document.getElementById('placeholderIcon');
+        const text = document.getElementById('placeholderText');
 
-@{
-    ViewData["Title"] = "Test Create Product";
-}
+        function updatePreview() {
+            const url = imgInput.value.trim();
+            if (url) {
+                previewImg.src = url;
+                previewImg.onload = function () {
+                    previewImg.classList.remove('d-none');
+                    icon.classList.add('d-none');
+                    text.classList.add('d-none');
+                };
+                previewImg.onerror = function () {
+                    previewImg.classList.add('d-none');
+                    icon.classList.remove('d-none');
+                    text.classList.remove('d-none');
+                    text.textContent = 'Invalid image URL or unable to load';
+                };
+            } else {
+                previewImg.classList.add('d-none');
+                icon.classList.remove('d-none');
+                text.classList.remove('d-none');
+                text.textContent = 'Image preview will appear here';
+            }
+        }
 
-<h2>Test Create Product</h2>
-
-<form asp-action="Edit" asp-controller="Product" method="post">
-
-    <div class="mb-3">
-        <label asp-for="Name"></label>
-        <input asp-for="Name" class="form-control" />
-        <span asp-validation-for="Name" class="text-danger"></span>
-    </div>
-
-    <div class="mb-3">
-        <label asp-for="Description"></label>
-        <input asp-for="Description" class="form-control" />
-        <span asp-validation-for="Description" class="text-danger"></span>
-    </div>
-
-    <div class="mb-3">
-        <label asp-for="Price"></label>
-        <input asp-for="Price" class="form-control" />
-        <span asp-validation-for="Price" class="text-danger"></span>
-    </div>
-
-    <div class="mb-3">
-        <label asp-for="Img"></label>
-        <input asp-for="Img" class="form-control" />
-        <span asp-validation-for="Img" class="text-danger"></span>
-    </div>
-
-    <div class="mb-3">
-        <label asp-for="CategoryId"></label>
-        <input asp-for="CategoryId" type="number" class="form-control" />
-        <span asp-validation-for="CategoryId" class="text-danger"></span>
-    </div>
-
-    <button type="submit" class="btn btn-primary">
-        Submit
-    </button>
-
-</form>
-
-@section Scripts
-{
-    <partial name="_ValidationScriptsPartial" />
+        imgInput.addEventListener('input', updatePreview);
+    </script>
 }

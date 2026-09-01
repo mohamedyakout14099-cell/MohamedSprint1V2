@@ -71,6 +71,51 @@ namespace MohamedSprint1V2.DAL.Database
                     await userManager.ResetPasswordAsync(adminUser, token, "Admin@123");
                 }
             }
+
+            // 3. Seed Default Manager User (مستخدم Manager افتراضي)
+            var managerEmail = "manager@manager.com";
+            var managerUser = await userManager.FindByEmailAsync(managerEmail)
+                              ?? await userManager.FindByNameAsync("manager");
+
+            if (managerUser == null)
+            {
+                managerUser = new ApplicationUser
+                {
+                    UserName = "manager",
+                    Email = managerEmail,
+                    Name = "General Manager",
+                    EmailConfirmed = true,
+                    City = "Cairo",
+                    Address = "Headquarters",
+                    Img = new List<byte>()
+                };
+
+                var createMgrResult = await userManager.CreateAsync(managerUser, "Manager@123");
+                if (createMgrResult.Succeeded)
+                {
+                    await userManager.AddToRoleAsync(managerUser, "Manager");
+                }
+            }
+            else
+            {
+                if (string.IsNullOrEmpty(managerUser.Email))
+                {
+                    managerUser.Email = managerEmail;
+                    await userManager.UpdateAsync(managerUser);
+                }
+
+                if (!await userManager.IsInRoleAsync(managerUser, "Manager"))
+                {
+                    await userManager.AddToRoleAsync(managerUser, "Manager");
+                }
+
+                var isMgrPasswordCorrect = await userManager.CheckPasswordAsync(managerUser, "Manager@123");
+                if (!isMgrPasswordCorrect)
+                {
+                    var token = await userManager.GeneratePasswordResetTokenAsync(managerUser);
+                    await userManager.ResetPasswordAsync(managerUser, token, "Manager@123");
+                }
+            }
         }
     }
 }

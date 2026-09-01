@@ -1,9 +1,9 @@
-﻿@using MohamedSprint1V2.DLL.ModelVM.Category
+@using MohamedSprint1V2.DLL.ModelVM.Category
 @model UpdaeteCategoryVM
 
 @{
-    ViewBag.PageTitle = "Category Management";
-    ViewBag.CardTitle = "Edit Category";
+    ViewData["Title"] = "Edit Category";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
@@ -11,126 +11,112 @@
 <style>
     .custom-card {
         background: #ffffff;
-        border-radius: 14px;
-        border: 1px solid #d0d7de;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+        border-radius: 16px;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+        overflow: hidden;
+        animation: fadeIn 0.4s ease;
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(8px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 
     .custom-card-header {
-        background: #f1f5fb;
-        border-bottom: 1px solid #d0d7de;
-        padding: 18px 0;
-        text-align: center;
+        background: linear-gradient(135deg, #d97706, #f59e0b);
+        padding: 20px 24px;
+        color: white;
     }
 
     .custom-card-header h4 {
-        color: #1e3a8a;
-        font-weight: 700;
         margin: 0;
+        font-weight: 700;
+        font-size: 1.35rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
     }
 
-    .form-control,
-    textarea {
-        background-color: #fefefe;
-        border: 1px solid #a0aec0;
-        border-radius: 8px;
+    .form-control, textarea {
+        border-radius: 10px;
         padding: 10px 14px;
-        color: #1e3a8a;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        border: 1px solid #d1d5db;
+        transition: all 0.2s ease;
     }
 
-    .form-control:focus,
-    textarea:focus {
-        border-color: #1e40af;
-        box-shadow: 0 0 0 .2rem rgba(59,130,246,.25);
+    .form-control:focus, textarea:focus {
+        border-color: #f59e0b;
+        box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
     }
 
     .form-label {
         font-weight: 600;
-        color: #1e3a8a;
-    }
-
-    .btn-primary {
-        padding: 9px 20px;
-        border-radius: 8px;
-        background-color: #1e40af;
-        border: none;
-    }
-
-    .btn-outline-secondary {
-        border-radius: 8px;
+        color: #92400e;
+        margin-bottom: 6px;
     }
 </style>
 
-<div class="row justify-content-center">
-    <div class="col-md-7">
+<div class="row justify-content-center my-4">
+    <div class="col-lg-7 col-md-9">
         <div class="custom-card">
-
+            <!-- Header -->
             <div class="custom-card-header">
                 <h4>
-                    <i class="fa-solid fa-pen-to-square me-2"></i>
-                    @ViewBag.CardTitle
+                    <i class="fa-solid fa-pen-to-square"></i>
+                    Edit Category #@Model.Id
                 </h4>
+                <small class="text-white-50">Update category details and description</small>
             </div>
 
-            <div class="card-body p-4">
-
-                @if (TempData["ErrorMessage"] != null)
-                {
-                    <div class="alert alert-danger">
-                        @TempData["ErrorMessage"]
-                    </div>
-                }
-
+            <!-- Form Body -->
+            <div class="p-4">
                 <form asp-action="Edit" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="Id" />
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
 
-                    <input asp-for="Id" type="hidden"/>
+                    <div class="row g-3">
+                        <!-- Name -->
+                        <div class="col-12">
+                            <label asp-for="Name" class="form-label">
+                                <i class="fa-solid fa-tag text-warning me-1"></i> Category Name <span class="text-danger">*</span>
+                            </label>
+                            <input asp-for="Name" class="form-control" placeholder="Enter category name" />
+                            <span asp-validation-for="Name" class="text-danger small"></span>
+                        </div>
 
-                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                        <!-- Description -->
+                        <div class="col-12">
+                            <label asp-for="Description" class="form-label">
+                                <i class="fa-solid fa-align-left text-warning me-1"></i> Description <span class="text-danger">*</span>
+                            </label>
+                            <textarea asp-for="Description" rows="4" class="form-control" placeholder="Enter category description..."></textarea>
+                            <span asp-validation-for="Description" class="text-danger small"></span>
+                        </div>
 
-                    <div class="mb-3">
-                        <label asp-for="Name" class="form-label"></label>
-
-                        <input asp-for="Name"
-                               class="form-control"
-                               placeholder="Enter category name..." />
-
-                        <span asp-validation-for="Name" class="text-danger"></span>
+                        <!-- Action Buttons -->
+                        <div class="col-12 mt-4 d-flex justify-content-between">
+                            <a asp-action="Index" class="btn btn-outline-secondary px-4 py-2" style="border-radius: 10px;">
+                                <i class="fa-solid fa-arrow-left me-1"></i> Back to List
+                            </a>
+                            <button type="submit" class="btn btn-warning px-4 py-2 shadow-sm text-dark fw-bold" style="border-radius: 10px;">
+                                <i class="fa-solid fa-floppy-disk me-1"></i> Save Changes
+                            </button>
+                        </div>
                     </div>
-
-                    <div class="mb-4">
-                        <label asp-for="Description" class="form-label"></label>
-
-                        <textarea asp-for="Description"
-                                  rows="4"
-                                  class="form-control"
-                                  placeholder="Enter description..."></textarea>
-
-                        <span asp-validation-for="Description" class="text-danger"></span>
-                    </div>
-
-                    <div class="d-flex justify-content-between">
-
-                        <a asp-action="Index" class="btn btn-outline-secondary">
-                            <i class="fa-solid fa-arrow-left me-1"></i>
-                            Back
-                        </a>
-
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fa-solid fa-floppy-disk me-1"></i>
-                            Save Changes
-                        </button>
-
-                    </div>
-
                 </form>
-
             </div>
-
         </div>
     </div>
 </div>
 
-@section Scripts{
-    <partial name="_ValidationScriptsPartial"/>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
 }

@@ -3,22 +3,21 @@
 @model Response<List<GetAllProductVM>>
 
 @{
-    ViewBag.PageTitle = "Products Management";
-    ViewBag.CardTitle = "Products List";
+    ViewData["Title"] = "Products Management";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var productsList = Model?.result ?? new List<GetAllProductVM>();
 }
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
 <style>
     .custom-card {
-        background: rgba(255,255,255,.75);
-        backdrop-filter: blur(12px);
-        border-radius: 18px;
-        border: 1px solid rgba(160,173,186,.35);
-        box-shadow: 0 15px 35px rgba(0,0,0,.12);
+        background: #ffffff;
+        border-radius: 16px;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
         padding: 28px;
-        animation: fadeIn .4s ease;
+        animation: fadeIn 0.4s ease;
     }
 
     @@keyframes fadeIn {
@@ -26,156 +25,298 @@
             opacity: 0;
             transform: translateY(8px);
         }
-
         to {
             opacity: 1;
             transform: translateY(0);
         }
     }
 
-    .custom-card-title {
-        background: linear-gradient(135deg,#1e3a8a,#3b82f6);
-        padding: 18px;
+    .custom-card-header {
+        background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+        padding: 20px 24px;
         border-radius: 14px;
-        margin-bottom: 22px;
-        text-align: center;
+        margin-bottom: 24px;
         color: white;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .custom-card-header h3 {
+        margin: 0;
         font-weight: 700;
-        font-size: 22px;
+        font-size: 1.45rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
     }
 
-    .top-btn {
-        margin-bottom: 18px;
-        text-align: right;
-    }
-
-    .btn-primary {
-        padding: 10px 22px;
-        border-radius: 10px;
+    .badge-count {
+        background: rgba(255, 255, 255, 0.25);
+        color: #ffffff;
+        font-size: 0.85rem;
+        padding: 6px 14px;
+        border-radius: 20px;
+        backdrop-filter: blur(4px);
         font-weight: 600;
     }
 
-    table thead th {
-        background: #1e40af;
-        color: white;
+    .action-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-bottom: 22px;
+    }
+
+    .search-box {
+        position: relative;
+        max-width: 320px;
+        width: 100%;
+    }
+
+    .search-box input {
+        border-radius: 10px;
+        padding-left: 38px;
+        border: 1px solid #d1d5db;
+        transition: all 0.2s ease;
+    }
+
+    .search-box input:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    }
+
+    .search-box .search-icon {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #9ca3af;
+    }
+
+    .custom-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid #e5e7eb;
+    }
+
+    .custom-table thead th {
+        background-color: #1e40af;
+        color: #ffffff;
+        font-weight: 600;
+        padding: 14px 16px;
+        text-align: left;
+        font-size: 0.9rem;
+        border: none;
+    }
+
+    .custom-table thead th:last-child {
         text-align: center;
     }
 
-    table tbody td {
+    .custom-table tbody tr {
+        transition: background-color 0.2s ease;
+    }
+
+    .custom-table tbody tr:hover {
+        background-color: #f0f7ff;
+    }
+
+    .custom-table tbody td {
+        padding: 14px 16px;
         vertical-align: middle;
-        text-align: center;
+        border-top: 1px solid #e5e7eb;
+        color: #374151;
+        font-size: 0.92rem;
+    }
+
+    .product-img {
+        width: 55px;
+        height: 55px;
+        object-fit: cover;
+        border-radius: 10px;
+        border: 1px solid #e5e7eb;
+        background: #f9fafb;
+    }
+
+    .price-badge {
+        background-color: #ecfdf5;
+        color: #047857;
+        font-weight: 700;
+        padding: 4px 10px;
+        border-radius: 8px;
+        font-size: 0.88rem;
+        display: inline-block;
+        border: 1px solid #a7f3d0;
+    }
+
+    .category-badge {
+        background-color: #eff6ff;
+        color: #1d4ed8;
+        padding: 4px 10px;
+        border-radius: 8px;
+        font-size: 0.82rem;
+        font-weight: 600;
+        display: inline-block;
+        border: 1px solid #bfdbfe;
     }
 
     .action-btn {
-        margin: 2px;
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: all 0.2s ease;
     }
 
-    img {
-        width: 80px;
-        height: 80px;
-        object-fit: contain;
-        border-radius: 6px;
+    .empty-state {
+        text-align: center;
+        padding: 50px 20px;
+        color: #6b7280;
+    }
+
+    .empty-state i {
+        font-size: 3.5rem;
+        color: #9ca3af;
+        margin-bottom: 16px;
     }
 </style>
 
 <div class="custom-card">
-
-    <div class="custom-card-title">
-        <i class="fa-solid fa-box-open me-2"></i>
-        Products List
+    <!-- Header Banner -->
+    <div class="custom-card-header">
+        <div>
+            <h3>
+                <i class="fa-solid fa-box-open"></i>
+                Products Management
+            </h3>
+            <small class="text-white-50">Manage your product catalog, prices, and categories</small>
+        </div>
+        <div class="badge-count">
+            <i class="fa-solid fa-cubes me-1"></i> Total: @productsList.Count Products
+        </div>
     </div>
 
+    <!-- Alert Messages -->
     @if (TempData["SuccessMessage"] != null)
     {
-        <div class="alert alert-success">
-            @TempData["SuccessMessage"]
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fa-solid fa-circle-check me-2"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     }
 
     @if (TempData["ErrorMessage"] != null)
     {
-        <div class="alert alert-danger">
-            @TempData["ErrorMessage"]
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fa-solid fa-triangle-exclamation me-2"></i> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     }
 
-    <div class="top-btn">
-        <a asp-action="Create" class="btn btn-primary">
-            <i class="fa-solid fa-circle-plus"></i>
-            Create Product
-        </a>
+    <!-- Action Bar -->
+    <div class="action-bar">
+        <div class="search-box">
+            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+            <input type="text" id="productSearchInput" class="form-control" placeholder="Search products by name, description..." />
+        </div>
+        <div>
+            <a asp-action="Create" class="btn btn-primary shadow-sm" style="border-radius: 10px; font-weight: 600;">
+                <i class="fa-solid fa-circle-plus me-1"></i> Create Product
+            </a>
+        </div>
     </div>
 
-    <table class="table table-bordered table-hover">
-
-        <thead>
-
-            <tr>
-                <th>Id</th>
-                <th>Name</th>
-                <th>Description</th>
-                <th>Image</th>
-                <th>Price</th>
-                <th>Category Id</th>
-                <th style="width:170px;">Actions</th>
-            </tr>
-
-        </thead>
-
-        <tbody>
-
-            @if (Model.result != null && Model.result.Count > 0)
-            {
-                @foreach (var item in Model.result)
-                {
+    <!-- Products Table -->
+    @if (productsList.Count > 0)
+    {
+        <div class="table-responsive">
+            <table class="table custom-table" id="productsTable">
+                <thead>
                     <tr>
-                        <td>@item.id</td>
-                        <td>@item.name</td>
-
-                        <td>@item.description</td>
-
-                        <td>
-                            <img src="@item.img" alt="Product Image" />
-                        </td>
-
-                        <td>@item.price</td>
-
-                        <td>@item.categoryId</td>
-
-                        <td>
-
-                            <a asp-action="Edit"
-                               asp-route-id="@item.id"
-                               class="btn btn-warning btn-sm action-btn">
-                                <i class="fa-solid fa-pen"></i>
-                                Edit
-                            </a>
-
-                            <a asp-action="Delete"
-                               asp-route-id="@item.id"
-                               class="btn btn-danger btn-sm action-btn">
-                                <i class="fa-solid fa-trash"></i>
-                                Delete
-                            </a>
-
-                        </td>
-
+                        <th style="width: 60px;">#</th>
+                        <th>Product</th>
+                        <th>Description</th>
+                        <th>Price</th>
+                        <th>Category</th>
+                        <th style="width: 170px;">Actions</th>
                     </tr>
-                }
-            }
-            else
-            {
-                <tr>
-
-                    <td colspan="6" class="text-center text-danger">
-                        No Products Found
-                    </td>
-
-                </tr>
-            }
-
-        </tbody>
-
-    </table>
-
+                </thead>
+                <tbody>
+                    @foreach (var item in productsList)
+                    {
+                        <tr>
+                            <td class="text-muted fw-semibold">@item.id</td>
+                            <td>
+                                <div class="d-flex align-items-center gap-3">
+                                    <img src="@item.img" alt="@item.name" class="product-img shadow-sm" onerror="this.src='https://placehold.co/80x80?text=Product';" />
+                                    <div>
+                                        <div class="fw-bold text-dark">@item.name</div>
+                                        <small class="text-muted">ID: @item.id</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="text-truncate" style="max-width: 280px;" title="@item.description">
+                                    @(string.IsNullOrWhiteSpace(item.description) ? "-" : item.description)
+                                </div>
+                            </td>
+                            <td>
+                                <span class="price-badge">
+                                    @item.price.ToString("N2") EGP
+                                </span>
+                            </td>
+                            <td>
+                                <span class="category-badge">
+                                    <i class="fa-solid fa-folder me-1"></i> Category #@item.categoryId
+                                </span>
+                            </td>
+                            <td>
+                                <div class="d-flex justify-content-center gap-2">
+                                    <a asp-action="Edit" asp-route-id="@item.id" class="btn btn-warning btn-sm action-btn text-dark" title="Edit Product">
+                                        <i class="fa-solid fa-pen-to-square me-1"></i> Edit
+                                    </a>
+                                    <a asp-action="Delete" asp-route-id="@item.id" class="btn btn-danger btn-sm action-btn" title="Delete Product">
+                                        <i class="fa-solid fa-trash me-1"></i> Delete
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="empty-state">
+            <i class="fa-solid fa-box-open"></i>
+            <h4>No Products Available</h4>
+            <p class="text-muted">You haven't created any products yet. Click the button below to add your first product.</p>
+            <a asp-action="Create" class="btn btn-outline-primary mt-2">
+                <i class="fa-solid fa-circle-plus me-1"></i> Create First Product
+            </a>
+        </div>
+    }
 </div>
+
+@section Scripts {
+    <script>
+        document.getElementById('productSearchInput')?.addEventListener('keyup', function () {
+            const query = this.value.toLowerCase().trim();
+            const rows = document.querySelectorAll('#productsTable tbody tr');
+
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(query) ? '' : 'none';
+            });
+        });
+    </script>
+}
