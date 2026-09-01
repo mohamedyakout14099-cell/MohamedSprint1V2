@@ -16,7 +16,7 @@
                 <small class="text-white-50">Welcome back! Please enter your credentials</small>
             </div>
             <div class="card-body p-4">
-                <form asp-controller="Auth" asp-action="Login" method="post">
+                <form asp-controller="Auth" asp-action="Login" asp-route-returnUrl="@(ViewData["ReturnUrl"] ?? Context.Request.Query["ReturnUrl"])" method="post">
                     @Html.AntiForgeryToken()
 
                     <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
@@ -24,9 +24,9 @@
                     <!-- Email / Username -->
                     <div class="mb-3">
                         <label asp-for="Email" class="form-label fw-semibold">
-                            <i class="fa-solid fa-envelope text-primary me-1"></i> Email Address
+                            <i class="fa-solid fa-envelope text-primary me-1"></i> Email / Username
                         </label>
-                        <input asp-for="Email" class="form-control" autocomplete="username" placeholder="name@example.com" />
+                        <input asp-for="Email" class="form-control" autocomplete="username" placeholder="admin@admin.com or admin" />
                         <span asp-validation-for="Email" class="text-danger small"></span>
                     </div>
 

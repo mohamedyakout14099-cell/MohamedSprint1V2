@@ -1,0 +1,28 @@
+@{
+    ViewData["Title"] = "Access Denied";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row justify-content-center my-5">
+    <div class="col-lg-6 col-md-8 text-center">
+        <div class="card shadow-sm border-0 rounded-4 p-4">
+            <div class="card-body">
+                <div class="mb-4">
+                    <i class="fa-solid fa-shield-halved text-danger" style="font-size: 4.5rem;"></i>
+                </div>
+                <h2 class="text-danger fw-bold mb-3">Access Denied / غير مصرح بالدخول</h2>
+                <p class="text-muted fs-6 mb-4">
+                    عفواً، ليس لديك الصلاحيات الكافية للوصول إلى هذه الصفحة. هذه الصفحة مخصصة لمديري النظام (Admin) فقط.
+                </p>
+                <div class="d-flex justify-content-center gap-3">
+                    <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary px-4 py-2">
+                        <i class="fa-solid fa-house me-1"></i> الرئيسية (Home)
+                    </a>
+                    <a asp-controller="Auth" asp-action="Login" class="btn btn-primary px-4 py-2">
+                        <i class="fa-solid fa-arrow-right-to-bracket me-1"></i> تسجيل الدخول بحساب آخر
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

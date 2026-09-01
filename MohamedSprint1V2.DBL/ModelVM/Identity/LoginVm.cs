@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -6,8 +6,7 @@ namespace MohamedSprint1V2.DLL.ModelVM.Identity
 {
     public class LoginVm
     {
-        [Required(ErrorMessage = "الإيميل مطلوب")]
-        [EmailAddress(ErrorMessage = "صيغة الإيميل غلط")]
+        [Required(ErrorMessage = "البريد الإلكتروني أو اسم المستخدم مطلوب")]
         public string Email { get; set; }
 
         [Required(ErrorMessage = "الباسورد مطلوب")]

@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MohamedSprint1V2.DLL.ModelVM.Identity;
 using MohamedSprint1V2.DLL.Service.Abstraction;
@@ -12,26 +13,23 @@ namespace MohamedSprint1V2.PL.Controllers
         {
             _authService = authService;
         }
-        [HttpGet]
-        public IActionResult Index(){
-            return View();
-        }
 
-        [HttpPost]
-        
-        public async Task<IActionResult> Index(string UserName, string Password)
+        [Authorize(Roles = "Admin")]
+        [HttpGet]
+        public async Task<IActionResult> Index()
         {
             var users = await _authService.GetAllUSers();
-
             return View(users);
-
         }
+
+        
         [HttpGet]
         public IActionResult Register()
         {
             return View();
         }
 
+        
         [HttpPost]
         public async Task<IActionResult> RegisterAsync(RegisterVM registerVM, IFormFile? imageFile)
         {
@@ -79,7 +77,11 @@ namespace MohamedSprint1V2.PL.Controllers
             var result = await _authService.Login(loginVm);
             if (result.Successornot) 
             {
-                return RedirectToAction("Index", "Product");
+                if(loginVm.UserName == "admin")
+                    return RedirectToAction("Index", "Auth");
+                else
+                    return RedirectToAction("Index", "Product");
+         
             }
 
             ModelState.AddModelError(string.Empty, result.Message ?? "Invalid login attempt.");

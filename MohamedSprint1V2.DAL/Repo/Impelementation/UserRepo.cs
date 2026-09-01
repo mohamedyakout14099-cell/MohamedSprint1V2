@@ -27,8 +27,8 @@ namespace MohamedSprint1V2.DAL.Repo.Impelementation
              string password,
              bool RememberMe)
         {
-            var user = await _userManager.FindByNameAsync(userName)
-                       ?? await _userManager.FindByEmailAsync(userName);
+            var user = await _userManager.FindByEmailAsync(userName)
+                       ?? await _userManager.FindByNameAsync(userName);
 
             if (user == null || string.IsNullOrEmpty(user.UserName))
             {
@@ -36,7 +36,7 @@ namespace MohamedSprint1V2.DAL.Repo.Impelementation
             }
 
             var result = await _signInManager.PasswordSignInAsync(
-                user.UserName,
+                user,
                 password,
                 RememberMe,
                 false);
