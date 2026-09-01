@@ -9,17 +9,19 @@ namespace MohamedSprint1V2.DAL.Entity
         {
         }
 
-        public ApplicationUser(string name, string? address, string? city, string userName, string email)
+        public ApplicationUser(string name, string? address, string? city, string userName, string email, List<byte> img)
         {
             Name = name;
             Address = address;
             City = city;
             UserName = userName;
             Email = email;
+            Img = img;
         }
 
+        public List<byte> Img { get; set; } 
         [Required]
-        public string Name { get; set; } = string.Empty;
+        public string Name { get; set; } 
 
         public string? Address { get; set; }
 

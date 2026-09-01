@@ -1,28 +1,70 @@
-﻿@using MohamedSprint1V2.DLL.ModelVM.Identity
-@* PL/Views/Account/Login.cshtml *@
+@using MohamedSprint1V2.DLL.ModelVM.Identity
 @model LoginVm
 
-<h2>تسجيل الدخول</h2>
+@{
+    ViewData["Title"] = "Login";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
 
-<form asp-action="Login" method="post">
-    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+<div class="row justify-content-center my-5">
+    <div class="col-lg-5 col-md-8">
+        <div class="card shadow-sm border-0 rounded-3">
+            <div class="card-header bg-primary text-white text-center py-3 rounded-top-3">
+                <h3 class="mb-0 fw-bold">
+                    <i class="fa-solid fa-arrow-right-to-bracket me-2"></i> Log In
+                </h3>
+                <small class="text-white-50">Welcome back! Please enter your credentials</small>
+            </div>
+            <div class="card-body p-4">
+                <form asp-controller="Auth" asp-action="Login" method="post">
+                    @Html.AntiForgeryToken()
 
-    <div class="mb-3">
-        <label asp-for="Email"></label>
-        <input asp-for="Email" class="form-control" />
-        <span asp-validation-for="Email" class="text-danger"></span>
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                    <!-- Email / Username -->
+                    <div class="mb-3">
+                        <label asp-for="Email" class="form-label fw-semibold">
+                            <i class="fa-solid fa-envelope text-primary me-1"></i> Email Address
+                        </label>
+                        <input asp-for="Email" class="form-control" autocomplete="username" placeholder="name@example.com" />
+                        <span asp-validation-for="Email" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Password -->
+                    <div class="mb-3">
+                        <label asp-for="Password" class="form-label fw-semibold">
+                            <i class="fa-solid fa-lock text-primary me-1"></i> Password
+                        </label>
+                        <input asp-for="Password" type="password" class="form-control" autocomplete="current-password" placeholder="Enter your password" />
+                        <span asp-validation-for="Password" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Remember Me -->
+                    <div class="form-check mb-3">
+                        <input asp-for="RememberMe" class="form-check-input" id="rememberMeCheck" />
+                        <label asp-for="RememberMe" class="form-check-label" for="rememberMeCheck">
+                            Remember me on this device
+                        </label>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" class="btn btn-primary w-100 py-2 fs-6 fw-bold shadow-sm">
+                        <i class="fa-solid fa-arrow-right-to-bracket me-1"></i> Log In
+                    </button>
+                </form>
+            </div>
+            <div class="card-footer bg-light text-center py-3">
+                <span class="text-muted">Don't have an account?</span>
+                <a asp-controller="Auth" asp-action="Register" class="text-primary text-decoration-none fw-semibold ms-1">
+                    Register here <i class="fa-solid fa-user-plus ms-1"></i>
+                </a>
+            </div>
+        </div>
     </div>
+</div>
 
-    <div class="mb-3">
-        <label asp-for="Password"></label>
-        <input asp-for="Password" class="form-control" />
-        <span asp-validation-for="Password" class="text-danger"></span>
-    </div>
-
-    <div class="form-check mb-3">
-        <input asp-for="RememberMe" class="form-check-input" />
-        <label asp-for="RememberMe" class="form-check-label"></label>
-    </div>
-
-    <button type="submit" class="btn btn-primary">دخول</button>
-</form>
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

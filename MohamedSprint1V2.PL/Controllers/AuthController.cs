@@ -12,7 +12,20 @@ namespace MohamedSprint1V2.PL.Controllers
         {
             _authService = authService;
         }
+        [HttpGet]
+        public IActionResult Index(){
+            return View();
+        }
 
+        [HttpPost]
+        
+        public async Task<IActionResult> Index(string UserName, string Password)
+        {
+            var users = await _authService.GetAllUSers();
+
+            return View(users);
+
+        }
         [HttpGet]
         public IActionResult Register()
         {
@@ -20,8 +33,17 @@ namespace MohamedSprint1V2.PL.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> RegisterAsync(RegisterVM registerVM)
+        public async Task<IActionResult> RegisterAsync(RegisterVM registerVM, IFormFile? imageFile)
         {
+            if (imageFile != null && imageFile.Length > 0)
+            {
+                using (var memoryStream = new MemoryStream())
+                {
+                    await imageFile.CopyToAsync(memoryStream);
+                    registerVM.Img = memoryStream.ToArray().ToList();
+                }
+            }
+
             if (!ModelState.IsValid)
             {
                 return View(registerVM);

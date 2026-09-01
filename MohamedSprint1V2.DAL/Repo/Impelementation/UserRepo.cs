@@ -17,6 +17,10 @@ namespace MohamedSprint1V2.DAL.Repo.Impelementation
             _signInManager = signInManager;
             _roleManager = roleManager;
         }
+        public async Task<IEnumerable<ApplicationUser>> GetAllUsersAsync()
+        {
+            return await Task.FromResult(_userManager.Users.ToList());
+        }
 
         public async Task<bool> LoginUserAsync(
              string userName,
