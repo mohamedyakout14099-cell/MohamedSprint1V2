@@ -11,15 +11,18 @@ namespace MohamedSprint1V2.PL.Controllers
     public class ProductController : Controller
     {
         private readonly IProductService productService;
+        private readonly IFileService fileService;
         private readonly ICategoryService categoryService;
         private readonly IWebHostEnvironment webHostEnvironment;
 
         public ProductController(
             IProductService productService,
+            IFileService fileService,
             ICategoryService categoryService,
             IWebHostEnvironment webHostEnvironment)
         {
             this.productService = productService;
+            this.fileService = fileService;
             this.categoryService = categoryService;
             this.webHostEnvironment = webHostEnvironment;
         }
@@ -31,27 +34,27 @@ namespace MohamedSprint1V2.PL.Controllers
             ViewBag.Categories = new SelectList(list, "id", "name", selectedId);
         }
 
-        private async Task<string?> UploadImageAsync(IFormFile? imageFile)
-        {
-            if (imageFile == null || imageFile.Length == 0)
-                return null;
+        //private async Task<string?> UploadImageAsync(IFormFile? imageFile)
+        //{
+        //    if (imageFile == null || imageFile.Length == 0)
+        //        return null;
 
-            var uploadsFolder = Path.Combine(webHostEnvironment.WebRootPath, "images", "products");
-            if (!Directory.Exists(uploadsFolder))
-            {
-                Directory.CreateDirectory(uploadsFolder);
-            }
+        //    var uploadsFolder = Path.Combine(webHostEnvironment.WebRootPath, "images", "products");
+        //    if (!Directory.Exists(uploadsFolder))
+        //    {
+        //        Directory.CreateDirectory(uploadsFolder);
+        //    }
 
-            var uniqueFileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(imageFile.FileName);
-            var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+        //    var uniqueFileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(imageFile.FileName);
+        //    var filePath = Path.Combine(uploadsFolder, uniqueFileName);
 
-            using (var fileStream = new FileStream(filePath, FileMode.Create))
-            {
-                await imageFile.CopyToAsync(fileStream);
-            }
+        //    using (var fileStream = new FileStream(filePath, FileMode.Create))
+        //    {
+        //        await imageFile.CopyToAsync(fileStream);
+        //    }
 
-            return "/images/products/" + uniqueFileName;
-        }
+        //    return "/images/products/" + uniqueFileName;
+        //}
 
         public IActionResult Index()
         {
@@ -76,10 +79,17 @@ namespace MohamedSprint1V2.PL.Controllers
         {
             if (imageFile != null && imageFile.Length > 0)
             {
-                var uploadedPath = await UploadImageAsync(imageFile);
-                if (!string.IsNullOrEmpty(uploadedPath))
+                var uploadedPath = await fileService.UploadImageAsync(imageFile);
+                if (uploadedPath.Successornot)
                 {
-                    model.Img = uploadedPath;
+                    model.Img = uploadedPath.result;
+                }
+                else
+                {
+                    ModelState.AddModelError("", uploadedPath.Message ?? "Failed to upload image");
+                    LoadCategories(model.CategoryId);
+
+                    return View(model);
                 }
             }
 
@@ -127,10 +137,11 @@ namespace MohamedSprint1V2.PL.Controllers
         {
             if (imageFile != null && imageFile.Length > 0)
             {
-                var uploadedPath = await UploadImageAsync(imageFile);
-                if (!string.IsNullOrEmpty(uploadedPath))
+                var uploadedPath = await fileService.UploadImageAsync(imageFile);
+                if (uploadedPath.Successornot)
                 {
-                    productVM.Img = uploadedPath;
+                    await fileService.DeleteImageAsync(productVM.Img);
+                    productVM.Img = uploadedPath.result;
                 }
             }
 
@@ -182,6 +193,7 @@ namespace MohamedSprint1V2.PL.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Delete(UpdateProductVM productVM)
         {
+            fileService.DeleteImageAsync(productVM.Img);
             var result = productService.DeleteProduct(productVM.Id);
 
             if (result.Successornot)

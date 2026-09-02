@@ -28,5 +28,8 @@
 	<ItemGroup>
 	  <ProjectReference Include="..\MohamedSprint1V2.DBL\MohamedSprint1V2.DLL.csproj" />
 	</ItemGroup>
+	<ItemGroup>
+	  <Folder Include="wwwroot\images\products\" />
+	</ItemGroup>
 
 </Project>
