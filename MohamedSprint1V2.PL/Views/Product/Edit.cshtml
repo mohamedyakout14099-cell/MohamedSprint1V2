@@ -1,153 +1,249 @@
-﻿@* @model MohamedSprint1V2.DLL.ModelVM.Product.UpdateProductVM
+@using MohamedSprint1V2.DLL.ModelVM.Product
+@model UpdateProductVM
+
 @{
-    ViewBag.PageTitle = "Product Management";
-    ViewBag.CardTitle = "Edit Product";
+    ViewData["Title"] = "Edit Product";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
+
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
 <style>
-    .card {
-        border-radius: 15px;
-        box-shadow: 0 4px 12px rgba(0,0,0,.15);
+    .custom-card {
+        background: #ffffff;
+        border-radius: 16px;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+        overflow: hidden;
+        animation: fadeIn 0.4s ease;
     }
-    .form-control {
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(8px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .custom-card-header {
+        background: linear-gradient(135deg, #d97706, #f59e0b);
+        padding: 20px 24px;
+        color: white;
+    }
+
+    .custom-card-header h4 {
+        margin: 0;
+        font-weight: 700;
+        font-size: 1.35rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .form-control, textarea, .form-select {
         border-radius: 10px;
+        padding: 10px 14px;
+        border: 1px solid #d1d5db;
+        transition: all 0.2s ease;
     }
-    .btn {
+
+    .form-control:focus, textarea:focus, .form-select:focus {
+        border-color: #f59e0b;
+        box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #92400e;
+        margin-bottom: 6px;
+    }
+
+    .upload-dropzone {
+        border: 2px dashed #f59e0b;
+        border-radius: 14px;
+        padding: 24px;
+        text-align: center;
+        background: #fffbeb;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        position: relative;
+    }
+
+    .upload-dropzone:hover {
+        background: #fef3c7;
+        border-color: #d97706;
+        transform: translateY(-2px);
+    }
+
+    .upload-dropzone.dragover {
+        background: #fde68a;
+        border-color: #b45309;
+        box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.25);
+    }
+
+    .preview-img {
+        max-width: 100%;
+        max-height: 220px;
+        object-fit: contain;
         border-radius: 10px;
-    }
-    .validation-summary-errors {
-        color: red;
-        margin-bottom: 15px;
-    }
-    .field-validation-error {
-        color: red;
-        font-size: 14px;
     }
 </style>
 
-<div class="container mt-4">
+<div class="row justify-content-center my-4">
+    <div class="col-lg-8 col-md-10">
+        <div class="custom-card">
+            <!-- Header -->
+            <div class="custom-card-header">
+                <h4>
+                    <i class="fa-solid fa-pen-to-square"></i>
+                    Edit Product #@Model.Id
+                </h4>
+                <small class="text-white-50">Update product specifications, price, or category</small>
+            </div>
 
-    <div class="card">
-        <div class="card-header bg-warning text-dark">
-            <h3><i class="fas fa-edit"></i> Edit Product</h3>
-        </div>
+            <!-- Form Body -->
+            <div class="p-4">
+                <form asp-action="Edit" method="post" enctype="multipart/form-data">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="Id" />
+                    <input type="hidden" asp-for="Img" id="productImgHidden" />
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
 
-        <div class="card-body">
+                    <div class="row g-3">
+                        <!-- Name -->
+                        <div class="col-md-12">
+                            <label asp-for="Name" class="form-label">
+                                <i class="fa-solid fa-tag text-warning me-1"></i> Product Name <span class="text-danger">*</span>
+                            </label>
+                            <input asp-for="Name" class="form-control" placeholder="Enter product name" />
+                            <span asp-validation-for="Name" class="text-danger small"></span>
+                        </div>
 
-            <form asp-action="Edit" method="post">
+                        <!-- Description -->
+                        <div class="col-md-12">
+                            <label asp-for="Description" class="form-label">
+                                <i class="fa-solid fa-align-left text-warning me-1"></i> Description <span class="text-danger">*</span>
+                            </label>
+                            <textarea asp-for="Description" rows="3" class="form-control" placeholder="Enter full product description..."></textarea>
+                            <span asp-validation-for="Description" class="text-danger small"></span>
+                        </div>
 
-                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <!-- Price -->
+                        <div class="col-md-6">
+                            <label asp-for="Price" class="form-label">
+                                <i class="fa-solid fa-dollar-sign text-warning me-1"></i> Price (EGP) <span class="text-danger">*</span>
+                            </label>
+                            <input asp-for="Price" type="number" step="0.01" class="form-control" placeholder="0.00" />
+                            <span asp-validation-for="Price" class="text-danger small"></span>
+                        </div>
 
-                <!-- Hidden Id -->
-                <input asp-for="Id" type="hidden" />
+                        <!-- Category Selection -->
+                        <div class="col-md-6">
+                            <label asp-for="CategoryId" class="form-label">
+                                <i class="fa-solid fa-folder text-warning me-1"></i> Category <span class="text-danger">*</span>
+                            </label>
+                            <select asp-for="CategoryId" asp-items="ViewBag.Categories" class="form-select">
+                                <option value="">-- Select Category --</option>
+                            </select>
+                            <span asp-validation-for="CategoryId" class="text-danger small"></span>
+                        </div>
 
-                <div class="mb-3">
-                    <label asp-for="Name" class="form-label"></label>
-                    <input asp-for="Name" class="form-control" />
-                    <span asp-validation-for="Name" class="text-danger"></span>
-                </div>
+                        <!-- Product Image Upload from Device -->
+                        <div class="col-md-12">
+                            <label class="form-label">
+                                <i class="fa-solid fa-image text-warning me-1"></i> Product Image <span class="text-muted small">(Select new image from device to replace)</span>
+                            </label>
 
-                <div class="mb-3">
-                    <label asp-for="Description" class="form-label"></label>
-                    <textarea asp-for="Description" rows="4" class="form-control"></textarea>
-                    <span asp-validation-for="Description" class="text-danger"></span>
-                </div>
+                            <!-- Hidden File Input -->
+                            <input type="file" name="imageFile" id="imageFileInput" accept="image/*" class="d-none" />
 
-                <div class="mb-3">
-                    <label asp-for="Img" class="form-label"></label>
-                    <input asp-for="Img" class="form-control" />
-                    <span asp-validation-for="Img" class="text-danger"></span>
-                </div>
+                            <!-- Interactive Dropzone -->
+                            <div class="upload-dropzone" id="uploadDropzone" onclick="document.getElementById('imageFileInput').click()">
+                                <div id="previewUploadState" class="@(string.IsNullOrEmpty(Model.Img) ? "d-none" : "")">
+                                    <img id="livePreviewImg" src="@Model.Img" class="preview-img shadow-sm mb-2" alt="Product Preview" onerror="this.src='https://placehold.co/400x300?text=No+Image';" />
+                                    <div class="d-flex align-items-center justify-content-center gap-2 mt-2">
+                                        <span class="badge bg-warning text-dark px-3 py-2" id="fileNameBadge">
+                                            <i class="fa-solid fa-image me-1"></i> Current Product Image
+                                        </span>
+                                        <button type="button" class="btn btn-dark btn-sm rounded-pill" onclick="event.stopPropagation(); document.getElementById('imageFileInput').click();">
+                                            <i class="fa-solid fa-arrows-rotate me-1"></i> Change Image
+                                        </button>
+                                    </div>
+                                </div>
 
-                @if (!string.IsNullOrEmpty(Model.Img))
-                {
-                    <div class="mb-3">
-                        <img src="@Model.Img"
-                             width="180"
-                             class="img-thumbnail"
-                             alt="Product Image" />
+                                <div id="emptyUploadState" class="@(!string.IsNullOrEmpty(Model.Img) ? "d-none" : "")">
+                                    <i class="fa-solid fa-cloud-arrow-up text-warning fs-1 mb-2"></i>
+                                    <h6 class="fw-bold text-dark mb-1">Click to select an image from your device</h6>
+                                    <p class="text-muted small mb-2">Supports JPG, PNG, WEBP, GIF</p>
+                                    <button type="button" class="btn btn-outline-warning text-dark btn-sm px-3 rounded-pill">
+                                        <i class="fa-solid fa-folder-open me-1"></i> Browse Files
+                                    </button>
+                                </div>
+                            </div>
+                            <span asp-validation-for="Img" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="col-12 mt-4 d-flex justify-content-between">
+                            <a asp-action="Index" class="btn btn-outline-secondary px-4 py-2" style="border-radius: 10px;">
+                                <i class="fa-solid fa-arrow-left me-1"></i> Back to List
+                            </a>
+                            <button type="submit" class="btn btn-warning px-4 py-2 shadow-sm text-dark fw-bold" style="border-radius: 10px;">
+                                <i class="fa-solid fa-floppy-disk me-1"></i> Save Changes
+                            </button>
+                        </div>
                     </div>
-                }
-
-                <div class="mb-3">
-                    <label asp-for="Price" class="form-label"></label>
-                    <input asp-for="Price" class="form-control" />
-                    <span asp-validation-for="Price" class="text-danger"></span>
-                </div>
-
-                <div class="mb-3">
-                    <label asp-for="CategoryId" class="form-label"></label>
-                    <input asp-for="CategoryId" class="form-control" />
-                    <span asp-validation-for="CategoryId" class="text-danger"></span>
-                </div>
-
-                <button type="submit" class="btn btn-warning">
-                    <i class="fas fa-save"></i> Save Changes
-                </button>
-
-                <a asp-action="Index" class="btn btn-secondary">
-                    <i class="fas fa-arrow-left"></i> Back
-                </a>
-
-            </form>
-
+                </form>
+            </div>
         </div>
     </div>
-
 </div>
 
-@section Scripts
-{
+@section Scripts {
     <partial name="_ValidationScriptsPartial" />
-} *@
-@model MohamedSprint1V2.DLL.ModelVM.Product.UpdateProductVM
+    <script>
+        const fileInput = document.getElementById('imageFileInput');
+        const emptyState = document.getElementById('emptyUploadState');
+        const previewState = document.getElementById('previewUploadState');
+        const previewImg = document.getElementById('livePreviewImg');
+        const fileNameBadge = document.getElementById('fileNameBadge');
+        const dropzone = document.getElementById('uploadDropzone');
 
-@{
-    ViewData["Title"] = "Test Create Product";
-}
+        fileInput.addEventListener('change', function () {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    previewImg.src = e.target.result;
+                    fileNameBadge.innerHTML = `<i class="fa-solid fa-file-image me-1"></i> ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+                    emptyState.classList.add('d-none');
+                    previewState.classList.remove('d-none');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
 
-<h2>Test Create Product</h2>
+        // Drag & Drop
+        dropzone.addEventListener('dragover', function (e) {
+            e.preventDefault();
+            this.classList.add('dragover');
+        });
 
-<form asp-action="Edit" asp-controller="Product" method="post">
+        dropzone.addEventListener('dragleave', function () {
+            this.classList.remove('dragover');
+        });
 
-    <div class="mb-3">
-        <label asp-for="Name"></label>
-        <input asp-for="Name" class="form-control" />
-        <span asp-validation-for="Name" class="text-danger"></span>
-    </div>
-
-    <div class="mb-3">
-        <label asp-for="Description"></label>
-        <input asp-for="Description" class="form-control" />
-        <span asp-validation-for="Description" class="text-danger"></span>
-    </div>
-
-    <div class="mb-3">
-        <label asp-for="Price"></label>
-        <input asp-for="Price" class="form-control" />
-        <span asp-validation-for="Price" class="text-danger"></span>
-    </div>
-
-    <div class="mb-3">
-        <label asp-for="Img"></label>
-        <input asp-for="Img" class="form-control" />
-        <span asp-validation-for="Img" class="text-danger"></span>
-    </div>
-
-    <div class="mb-3">
-        <label asp-for="CategoryId"></label>
-        <input asp-for="CategoryId" type="number" class="form-control" />
-        <span asp-validation-for="CategoryId" class="text-danger"></span>
-    </div>
-
-    <button type="submit" class="btn btn-primary">
-        Submit
-    </button>
-
-</form>
-
-@section Scripts
-{
-    <partial name="_ValidationScriptsPartial" />
+        dropzone.addEventListener('drop', function (e) {
+            e.preventDefault();
+            this.classList.remove('dragover');
+            if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                fileInput.files = e.dataTransfer.files;
+                fileInput.dispatchEvent(new Event('change'));
+            }
+        });
+    </script>
 }

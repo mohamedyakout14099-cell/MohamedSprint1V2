@@ -15,7 +15,7 @@ namespace MohamedSprint1V2.DLL.Service.Impelementation
             {
                 if (categoryVM != null)
                 {
-                    var category = new Category(0, categoryVM.Name, categoryVM.Description);
+                    var category = new Category( categoryVM.Name, categoryVM.Description);
                         unitOfWork.Category.Add(category);
                     var result = unitOfWork.Save();
                     if(result>0)
@@ -93,7 +93,7 @@ namespace MohamedSprint1V2.DLL.Service.Impelementation
             try
             {
                 var category = new Category(
-                    categoryVM.Id,
+                    //categoryVM.Id,
                     categoryVM.Name,
                     categoryVM.Description);
 

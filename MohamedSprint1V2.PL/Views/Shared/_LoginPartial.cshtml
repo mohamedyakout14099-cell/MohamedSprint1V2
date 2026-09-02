@@ -1,0 +1,36 @@
+@using Microsoft.AspNetCore.Identity
+@using MohamedSprint1V2.DAL.Entity
+
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+<ul class="navbar-nav">
+@if (SignInManager.IsSignedIn(User))
+{
+    <li class="nav-item">
+        <span class="nav-link text-dark fw-semibold">
+            <i class="fa-solid fa-circle-user text-primary me-1"></i> Hello, @(User.Identity?.Name)!
+        </span>
+    </li>
+    <li class="nav-item">
+        <form id="logoutForm" class="form-inline d-inline" asp-controller="Auth" asp-action="Logout" method="post">
+            <button id="logout" type="submit" class="nav-link btn btn-link text-danger border-0 fw-semibold">
+                <i class="fa-solid fa-arrow-right-from-bracket me-1"></i> Logout
+            </button>
+        </form>
+    </li>
+}
+else
+{
+    <li class="nav-item">
+        <a class="nav-link text-dark" id="register" asp-controller="Auth" asp-action="Register">
+            <i class="fa-solid fa-user-plus me-1"></i> Register
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link text-dark" id="login" asp-controller="Auth" asp-action="Login">
+            <i class="fa-solid fa-arrow-right-to-bracket me-1"></i> Login
+        </a>
+    </li>
+}
+</ul>

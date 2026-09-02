@@ -1,182 +1,121 @@
-﻿@using MohamedSprint1V2.DLL.ModelVM.Category
+@using MohamedSprint1V2.DLL.ModelVM.Category
 @model AddCategoryVM
 
 @{
-    ViewBag.PageTitle = "Category Management";
-    ViewBag.CardTitle = "Create Category";
+    ViewData["Title"] = "Create Category";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<!-- Icons -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
 <style>
-    /* Card */
     .custom-card {
         background: #ffffff;
-        border-radius: 14px;
-        border: 1px solid #d0d7de;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+        border-radius: 16px;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+        overflow: hidden;
+        animation: fadeIn 0.4s ease;
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(8px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 
     .custom-card-header {
-        background: #f1f5fb;
-        border-bottom: 1px solid #d0d7de;
-        padding: 18px 0;
-        text-align: center;
+        background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+        padding: 20px 24px;
+        color: white;
     }
 
     .custom-card-header h4 {
-        color: #1e3a8a;
-        font-weight: 700;
         margin: 0;
+        font-weight: 700;
+        font-size: 1.35rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
     }
 
-    /* Inputs */
-    .form-control,
-    textarea {
-        background-color: #fefefe;
-        border: 1px solid #a0aec0;
-        border-radius: 8px;
+    .form-control, textarea {
+        border-radius: 10px;
         padding: 10px 14px;
-        transition: .25s ease;
-        color: #1e3a8a;
-        box-shadow: 0 4px 12px rgba(0,0,0,.05);
+        border: 1px solid #d1d5db;
+        transition: all 0.2s ease;
     }
 
-    .form-control::placeholder {
-        color: #7f9cf5;
-    }
-
-    .form-control:focus,
-    textarea:focus {
-        border-color: #1e40af;
-        box-shadow: 0 0 0 .2rem rgba(59,130,246,.25);
+    .form-control:focus, textarea:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
     }
 
     .form-label {
         font-weight: 600;
+        color: #1e3a8a;
         margin-bottom: 6px;
-        color: #1e3a8a;
-    }
-
-    /* Buttons */
-    .btn-primary {
-        padding: 9px 20px;
-        font-weight: 600;
-        border-radius: 8px;
-        background-color: #1e40af;
-        border: none;
-        color: white;
-        box-shadow: 0 4px 12px rgba(30,64,175,.3);
-    }
-
-    .btn-primary:hover {
-        background-color: #1e3a8a;
-        box-shadow: 0 6px 15px rgba(30,64,175,.4);
-    }
-
-    .btn-outline-secondary {
-        border-radius: 8px;
-        padding: 9px 18px;
-        border-color: #93c5fd;
-        font-weight: 600;
-        color: #1e3a8a;
-    }
-
-    .btn-outline-secondary:hover {
-        background-color: #bfdbfe;
-        color: #1e40af;
     }
 </style>
 
-<div class="row justify-content-center">
-    <div class="col-md-7">
+<div class="row justify-content-center my-4">
+    <div class="col-lg-7 col-md-9">
         <div class="custom-card">
-
+            <!-- Header -->
             <div class="custom-card-header">
                 <h4>
-                    <i class="fa-solid fa-folder-plus me-2"></i>
-                    @ViewBag.CardTitle
+                    <i class="fa-solid fa-folder-plus"></i>
+                    Create New Category
                 </h4>
+                <small class="text-white-50">Add a new category to classify your products</small>
             </div>
 
-            <div class="card-body p-4">
+            <!-- Form Body -->
+            <div class="p-4">
+                <form asp-action="Create" method="post">
+                    @Html.AntiForgeryToken()
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
 
-                @if (TempData["SuccessMessage"] != null)
-                {
-                    <div class="alert alert-success">
-                        @TempData["SuccessMessage"]
+                    <div class="row g-3">
+                        <!-- Name -->
+                        <div class="col-12">
+                            <label asp-for="Name" class="form-label">
+                                <i class="fa-solid fa-tag text-primary me-1"></i> Category Name <span class="text-danger">*</span>
+                            </label>
+                            <input asp-for="Name" class="form-control" placeholder="e.g. Electronics, Clothing, Books..." />
+                            <span asp-validation-for="Name" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="col-12">
+                            <label asp-for="Description" class="form-label">
+                                <i class="fa-solid fa-align-left text-primary me-1"></i> Description <span class="text-danger">*</span>
+                            </label>
+                            <textarea asp-for="Description" rows="4" class="form-control" placeholder="Enter category description..."></textarea>
+                            <span asp-validation-for="Description" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="col-12 mt-4 d-flex justify-content-between">
+                            <a asp-action="Index" class="btn btn-outline-secondary px-4 py-2" style="border-radius: 10px;">
+                                <i class="fa-solid fa-arrow-left me-1"></i> Back to List
+                            </a>
+                            <button type="submit" class="btn btn-primary px-4 py-2 shadow-sm" style="border-radius: 10px; font-weight: 600;">
+                                <i class="fa-solid fa-circle-plus me-1"></i> Create Category
+                            </button>
+                        </div>
                     </div>
-                }
-
-                @if (TempData["ErrorMessage"] != null)
-                {
-                    <div class="alert alert-danger">
-                        @TempData["ErrorMessage"]
-                    </div>
-                }
-
-                <form asp-controller="Category"
-                      asp-action="Create"
-                      method="post">
-
-                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
-
-                    <!-- Name -->
-                    <div class="mb-3">
-                        <label asp-for="Name" class="form-label">
-                            <i class="fa-solid fa-tag me-1"></i>
-                            Category Name
-                        </label>
-
-                        <input asp-for="Name"
-                               class="form-control"
-                               placeholder="Enter category name..." />
-
-                        <span asp-validation-for="Name" class="text-danger"></span>
-                    </div>
-
-                    <!-- Description -->
-                    <div class="mb-4">
-                        <label asp-for="Description" class="form-label">
-                            <i class="fa-solid fa-align-left me-1"></i>
-                            Description
-                        </label>
-
-                        <textarea asp-for="Description"
-                                  rows="4"
-                                  class="form-control"
-                                  placeholder="Enter description..."></textarea>
-
-                        <span asp-validation-for="Description" class="text-danger"></span>
-                    </div>
-
-                    <div class="d-flex justify-content-between">
-
-                        <a asp-controller="Category"
-                           asp-action="Index"
-                           class="btn btn-outline-secondary">
-                            <i class="fa-solid fa-arrow-left me-1"></i>
-                            Back
-                        </a>
-
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fa-solid fa-circle-plus me-1"></i>
-                            Create Category
-                        </button>
-
-                    </div>
-
                 </form>
-
             </div>
-
         </div>
     </div>
 </div>
 
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
+    <partial name="_ValidationScriptsPartial" />
 }

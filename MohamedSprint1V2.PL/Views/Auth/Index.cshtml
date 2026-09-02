@@ -1,0 +1,554 @@
+@using MohamedSprint1V2.DLL.ModelVM.Identity
+@using MohamedSprint1V2.DLL.ModelVM.ResponseResult
+@model Response<IEnumerable<AllUserVM>>
+
+@{
+    ViewData["Title"] = "Users Management";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var usersList = Model?.result?.ToList() ?? new List<AllUserVM>();
+    var isManager = User.IsInRole("Manager");
+}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+<style>
+    .custom-card {
+        background: #ffffff;
+        border-radius: 16px;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+        padding: 28px;
+        animation: fadeIn 0.4s ease;
+    }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(8px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .custom-card-header {
+        background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+        padding: 20px 24px;
+        border-radius: 14px;
+        margin-bottom: 24px;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .custom-card-header h3 {
+        margin: 0;
+        font-weight: 700;
+        font-size: 1.45rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .badge-user-count {
+        background: rgba(255, 255, 255, 0.25);
+        color: #ffffff;
+        font-size: 0.85rem;
+        padding: 6px 14px;
+        border-radius: 20px;
+        backdrop-filter: blur(4px);
+        font-weight: 600;
+    }
+
+    .action-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-bottom: 22px;
+    }
+
+    .search-box {
+        position: relative;
+        max-width: 320px;
+        width: 100%;
+    }
+
+    .search-box input {
+        border-radius: 10px;
+        padding-left: 38px;
+        border: 1px solid #d1d5db;
+        transition: all 0.2s ease;
+    }
+
+    .search-box input:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    }
+
+    .search-box .search-icon {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #9ca3af;
+    }
+
+    .filter-btn-group .btn {
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .user-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid #e5e7eb;
+    }
+
+    .user-table thead th {
+        background-color: #1e40af;
+        color: #ffffff;
+        font-weight: 600;
+        padding: 14px 16px;
+        text-align: left;
+        font-size: 0.9rem;
+        border: none;
+    }
+
+    .user-table thead th:last-child {
+        text-align: center;
+    }
+
+    .user-table tbody tr {
+        transition: background-color 0.2s ease;
+    }
+
+    .user-table tbody tr:hover {
+        background-color: #f0f7ff;
+    }
+
+    .user-table tbody tr.deleted-row {
+        background-color: #fef2f2;
+        opacity: 0.85;
+    }
+
+    .user-table tbody tr.deleted-row:hover {
+        background-color: #fee2e2;
+    }
+
+    .user-table tbody td {
+        padding: 14px 16px;
+        vertical-align: middle;
+        border-top: 1px solid #e5e7eb;
+        color: #374151;
+        font-size: 0.92rem;
+    }
+
+    .user-avatar {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid #e5e7eb;
+    }
+
+    .user-avatar-placeholder {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #e0e7ff, #c7d2fe);
+        color: #3730a3;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1rem;
+        border: 2px solid #e5e7eb;
+    }
+
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .user-name {
+        font-weight: 600;
+        color: #111827;
+        margin-bottom: 2px;
+    }
+
+    .username-badge {
+        background-color: #eff6ff;
+        color: #1d4ed8;
+        padding: 3px 8px;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        display: inline-block;
+    }
+
+    .role-badge-manager {
+        background-color: #f3e8ff;
+        color: #7e22ce;
+        border: 1px solid #d8b4fe;
+        font-weight: 700;
+        padding: 4px 10px;
+        border-radius: 8px;
+        font-size: 0.82rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .role-badge-admin {
+        background-color: #fef3c7;
+        color: #b45309;
+        border: 1px solid #fde68a;
+        font-weight: 700;
+        padding: 4px 10px;
+        border-radius: 8px;
+        font-size: 0.82rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .role-badge-user {
+        background-color: #eff6ff;
+        color: #1d4ed8;
+        border: 1px solid #bfdbfe;
+        font-weight: 600;
+        padding: 4px 10px;
+        border-radius: 8px;
+        font-size: 0.82rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .status-badge-active {
+        background-color: #dcfce7;
+        color: #15803d;
+        border: 1px solid #bbf7d0;
+        font-weight: 600;
+        padding: 4px 8px;
+        border-radius: 8px;
+        font-size: 0.8rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .status-badge-deleted {
+        background-color: #fee2e2;
+        color: #b91c1c;
+        border: 1px solid #fecaca;
+        font-weight: 600;
+        padding: 4px 8px;
+        border-radius: 8px;
+        font-size: 0.8rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .btn-action {
+        padding: 5px 10px;
+        border-radius: 8px;
+        font-size: 0.82rem;
+        font-weight: 600;
+        transition: all 0.2s ease;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 50px 20px;
+        color: #6b7280;
+    }
+
+    .empty-state i {
+        font-size: 3.5rem;
+        color: #9ca3af;
+        margin-bottom: 16px;
+    }
+</style>
+
+<div class="custom-card">
+    <!-- Header Banner -->
+    <div class="custom-card-header">
+        <div>
+            <h3>
+                <i class="fa-solid fa-users-gear"></i>
+                Users & Roles Management
+            </h3>
+            <small class="text-white-50">Manage registered users, assign roles, and handle account status</small>
+        </div>
+        <div class="badge-user-count">
+            <i class="fa-solid fa-user-check me-1"></i> Total Users: @usersList.Count
+        </div>
+    </div>
+
+    <!-- Alert Messages -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fa-solid fa-circle-check me-2"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fa-solid fa-triangle-exclamation me-2"></i> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (Model != null && !Model.Successornot && !string.IsNullOrEmpty(Model.Message))
+    {
+        <div class="alert alert-warning" role="alert">
+            <i class="fa-solid fa-circle-info me-2"></i> @Model.Message
+        </div>
+    }
+
+    <!-- Action Bar -->
+    <div class="action-bar">
+        <!-- Search -->
+        <div class="search-box">
+            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+            <input type="text" id="userSearchInput" class="form-control" placeholder="Search by name, username, email..." />
+        </div>
+
+        <!-- Filter Status Buttons -->
+        <div class="btn-group filter-btn-group" role="group">
+            <button type="button" class="btn btn-outline-primary active" id="btnFilterAll">All (@usersList.Count)</button>
+            <button type="button" class="btn btn-outline-success" id="btnFilterActive">Active (@usersList.Count(u => !u.IsDeleted))</button>
+            <button type="button" class="btn btn-outline-danger" id="btnFilterDeleted">Deleted (@usersList.Count(u => u.IsDeleted))</button>
+        </div>
+
+        <!-- Add User -->
+        <div>
+            <a asp-controller="Auth" asp-action="Register" class="btn btn-primary shadow-sm" style="border-radius: 10px; font-weight: 600;">
+                <i class="fa-solid fa-user-plus me-1"></i> Add New User
+            </a>
+        </div>
+    </div>
+
+    <!-- Users Table -->
+    @if (usersList.Count > 0)
+    {
+        <div class="table-responsive">
+            <table class="table user-table" id="usersTable">
+                <thead>
+                    <tr>
+                        <th style="width: 50px;">#</th>
+                        <th>User</th>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th style="width: 220px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        int index = 1;
+                    }
+                    @foreach (var user in usersList)
+                    {
+                        <tr class="@(user.IsDeleted ? "deleted-row" : "")" data-status="@(user.IsDeleted ? "deleted" : "active")">
+                            <td class="text-muted fw-semibold">@index</td>
+                            <td>
+                                <div class="user-info">
+                                    @if (user.Img != null && user.Img.Count > 0)
+                                    {
+                                        var base64 = Convert.ToBase64String(user.Img.ToArray());
+                                        var imgSrc = $"data:image/png;base64,{base64}";
+                                        <img src="@imgSrc" alt="@user.Name" class="user-avatar shadow-sm" />
+                                    }
+                                    else
+                                    {
+                                        <div class="user-avatar-placeholder shadow-sm">
+                                            @(!string.IsNullOrWhiteSpace(user.Name) ? user.Name.Substring(0, 1).ToUpper() : "U")
+                                        </div>
+                                    }
+                                    <div>
+                                        <div class="user-name">@(string.IsNullOrWhiteSpace(user.Name) ? "N/A" : user.Name)</div>
+                                        <small class="text-muted">ID: @(user.Id.Length > 8 ? user.Id.Substring(0, 8) + "..." : user.Id)</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="username-badge">
+                                    @@@(string.IsNullOrWhiteSpace(user.UserName) ? "unknown" : user.UserName)
+                                </span>
+                            </td>
+                            <td>
+                                <a href="mailto:@user.Email" class="text-decoration-none text-primary">
+                                    <i class="fa-regular fa-envelope me-1"></i> @user.Email
+                                </a>
+                            </td>
+                            <td>
+                                @if (user.Role == "Manager")
+                                {
+                                    <span class="role-badge-manager">
+                                        <i class="fa-solid fa-crown"></i> Manager
+                                    </span>
+                                }
+                                else if (user.Role == "Admin")
+                                {
+                                    <span class="role-badge-admin">
+                                        <i class="fa-solid fa-shield-halved"></i> Admin
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="role-badge-user">
+                                        <i class="fa-solid fa-user"></i> User
+                                    </span>
+                                }
+                            </td>
+                            <td>
+                                @if (user.IsDeleted)
+                                {
+                                    <span class="status-badge-deleted">
+                                        <i class="fa-solid fa-ban"></i> Deleted
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="status-badge-active">
+                                        <i class="fa-solid fa-check"></i> Active
+                                    </span>
+                                }
+                            </td>
+                            <td>
+                                <div class="d-flex justify-content-center align-items-center gap-1 flex-wrap">
+                                    <!-- Make Admin (Only Manager can promote User) -->
+                                    @if (isManager && user.Role == "User" && !user.IsDeleted)
+                                    {
+                                        <form asp-action="MakeAdmin" method="post" class="d-inline" onsubmit="return confirm('Promote this user to Admin?');">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="userId" value="@user.Id" />
+                                            <button type="submit" class="btn btn-warning btn-sm btn-action text-dark" title="Promote to Admin">
+                                                <i class="fa-solid fa-shield-halved me-1"></i> Make Admin
+                                            </button>
+                                        </form>
+                                    }
+
+                                    <!-- Soft Delete / Restore Actions -->
+                                    @if (!user.IsDeleted)
+                                    {
+                                        @if (user.Role != "Manager")
+                                        {
+                                            <form asp-action="SoftDelete" method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to deactivate (soft-delete) this user?');">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="userId" value="@user.Id" />
+                                                <button type="submit" class="btn btn-outline-danger btn-sm btn-action" title="Soft Delete">
+                                                    <i class="fa-solid fa-trash-can me-1"></i> Delete
+                                                </button>
+                                            </form>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <form asp-action="Restore" method="post" class="d-inline" onsubmit="return confirm('Restore this user account?');">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="userId" value="@user.Id" />
+                                            <button type="submit" class="btn btn-outline-success btn-sm btn-action" title="Restore Account">
+                                                <i class="fa-solid fa-rotate-left me-1"></i> Restore
+                                            </button>
+                                        </form>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                        index++;
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="empty-state">
+            <i class="fa-solid fa-user-slash"></i>
+            <h4>No Users Found</h4>
+            <p class="text-muted">There are currently no registered users in the database.</p>
+            <a asp-controller="Auth" asp-action="Register" class="btn btn-outline-primary mt-2">
+                <i class="fa-solid fa-user-plus me-1"></i> Register First User
+            </a>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        // Live client-side search filter
+        const searchInput = document.getElementById('userSearchInput');
+        const rows = document.querySelectorAll('#usersTable tbody tr');
+
+        let currentFilter = 'all';
+
+        function applyFilters() {
+            const query = searchInput ? searchInput.value.toLowerCase().trim() : '';
+
+            rows.forEach(row => {
+                const status = row.getAttribute('data-status');
+                const text = row.textContent.toLowerCase();
+
+                const matchesStatus = (currentFilter === 'all') ||
+                                      (currentFilter === 'active' && status === 'active') ||
+                                      (currentFilter === 'deleted' && status === 'deleted');
+
+                const matchesSearch = text.includes(query);
+
+                if (matchesStatus && matchesSearch) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        searchInput?.addEventListener('keyup', applyFilters);
+
+        const btnAll = document.getElementById('btnFilterAll');
+        const btnActive = document.getElementById('btnFilterActive');
+        const btnDeleted = document.getElementById('btnFilterDeleted');
+
+        function setActiveButton(activeBtn) {
+            [btnAll, btnActive, btnDeleted].forEach(btn => btn?.classList.remove('active'));
+            activeBtn?.classList.add('active');
+        }
+
+        btnAll?.addEventListener('click', function () {
+            currentFilter = 'all';
+            setActiveButton(this);
+            applyFilters();
+        });
+
+        btnActive?.addEventListener('click', function () {
+            currentFilter = 'active';
+            setActiveButton(this);
+            applyFilters();
+        });
+
+        btnDeleted?.addEventListener('click', function () {
+            currentFilter = 'deleted';
+            setActiveButton(this);
+            applyFilters();
+        });
+    </script>
+}

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http.HttpResults;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MohamedSprint1V2.DAL.EntityClasses;
@@ -9,6 +10,7 @@ using MohamedSprint1V2.DLL.Service.Impelementation;
 
 namespace MohamedSprint1V2.PL.Controllers
 {
+    [Authorize(Roles = "Manager,Admin")]
     public class CategoryController : Controller
     {
         private readonly ICategoryService categoryService;

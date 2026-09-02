@@ -9,12 +9,12 @@ namespace MohamedSprint1V2.DAL.EntityClasses
             Description = description;
         }
 
-        public Category(int id ,string name, string description)// for update
-        {
-            Id = id;
-            Name = name;
-            Description = description;
-        }
+        //public Category(int id ,string name, string description)// for update
+        //{
+        //    Id = id;
+        //    Name = name;
+        //    Description = description;
+        //}
 
         public int Id { get; private set; }
 
