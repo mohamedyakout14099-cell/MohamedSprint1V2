@@ -44,14 +44,14 @@
         gap: 10px;
     }
 
-    .form-control, textarea {
+    .form-control, textarea, .form-select {
         border-radius: 10px;
         padding: 10px 14px;
         border: 1px solid #d1d5db;
         transition: all 0.2s ease;
     }
 
-    .form-control:focus, textarea:focus {
+    .form-control:focus, textarea:focus, .form-select:focus {
         border-color: #f59e0b;
         box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
     }
@@ -62,24 +62,34 @@
         margin-bottom: 6px;
     }
 
-    .preview-container {
-        border: 2px dashed #cbd5e1;
-        border-radius: 12px;
-        padding: 15px;
+    .upload-dropzone {
+        border: 2px dashed #f59e0b;
+        border-radius: 14px;
+        padding: 24px;
         text-align: center;
-        background: #f8fafc;
-        min-height: 160px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-direction: column;
+        background: #fffbeb;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        position: relative;
+    }
+
+    .upload-dropzone:hover {
+        background: #fef3c7;
+        border-color: #d97706;
+        transform: translateY(-2px);
+    }
+
+    .upload-dropzone.dragover {
+        background: #fde68a;
+        border-color: #b45309;
+        box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.25);
     }
 
     .preview-img {
         max-width: 100%;
-        max-height: 180px;
+        max-height: 220px;
         object-fit: contain;
-        border-radius: 8px;
+        border-radius: 10px;
     }
 </style>
 
@@ -97,9 +107,10 @@
 
             <!-- Form Body -->
             <div class="p-4">
-                <form asp-action="Edit" method="post">
+                <form asp-action="Edit" method="post" enctype="multipart/form-data">
                     @Html.AntiForgeryToken()
                     <input type="hidden" asp-for="Id" />
+                    <input type="hidden" asp-for="Img" id="productImgHidden" />
                     <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
 
                     <div class="row g-3">
@@ -130,32 +141,50 @@
                             <span asp-validation-for="Price" class="text-danger small"></span>
                         </div>
 
-                        <!-- Category ID -->
+                        <!-- Category Selection -->
                         <div class="col-md-6">
                             <label asp-for="CategoryId" class="form-label">
-                                <i class="fa-solid fa-folder text-warning me-1"></i> Category ID <span class="text-danger">*</span>
+                                <i class="fa-solid fa-folder text-warning me-1"></i> Category <span class="text-danger">*</span>
                             </label>
-                            <input asp-for="CategoryId" type="number" class="form-control" placeholder="e.g. 1" />
+                            <select asp-for="CategoryId" asp-items="ViewBag.Categories" class="form-select">
+                                <option value="">-- Select Category --</option>
+                            </select>
                             <span asp-validation-for="CategoryId" class="text-danger small"></span>
                         </div>
 
-                        <!-- Image URL -->
+                        <!-- Product Image Upload from Device -->
                         <div class="col-md-12">
-                            <label asp-for="Img" class="form-label">
-                                <i class="fa-solid fa-image text-warning me-1"></i> Product Image URL <span class="text-danger">*</span>
+                            <label class="form-label">
+                                <i class="fa-solid fa-image text-warning me-1"></i> Product Image <span class="text-muted small">(Select new image from device to replace)</span>
                             </label>
-                            <input asp-for="Img" class="form-control" id="productImgInput" placeholder="https://example.com/image.jpg" />
-                            <span asp-validation-for="Img" class="text-danger small"></span>
-                        </div>
 
-                        <!-- Live Image Preview -->
-                        <div class="col-md-12">
-                            <label class="form-label text-muted small">Current / Updated Image Preview</label>
-                            <div class="preview-container" id="previewContainer">
-                                <i class="fa-regular fa-image text-muted fs-1 mb-2 @(!string.IsNullOrEmpty(Model.Img) ? "d-none" : "")" id="placeholderIcon"></i>
-                                <span class="text-muted small @(!string.IsNullOrEmpty(Model.Img) ? "d-none" : "")" id="placeholderText">Image preview will appear here</span>
-                                <img id="livePreviewImg" src="@Model.Img" class="preview-img shadow-sm @(string.IsNullOrEmpty(Model.Img) ? "d-none" : "")" alt="Preview" />
+                            <!-- Hidden File Input -->
+                            <input type="file" name="imageFile" id="imageFileInput" accept="image/*" class="d-none" />
+
+                            <!-- Interactive Dropzone -->
+                            <div class="upload-dropzone" id="uploadDropzone" onclick="document.getElementById('imageFileInput').click()">
+                                <div id="previewUploadState" class="@(string.IsNullOrEmpty(Model.Img) ? "d-none" : "")">
+                                    <img id="livePreviewImg" src="@Model.Img" class="preview-img shadow-sm mb-2" alt="Product Preview" onerror="this.src='https://placehold.co/400x300?text=No+Image';" />
+                                    <div class="d-flex align-items-center justify-content-center gap-2 mt-2">
+                                        <span class="badge bg-warning text-dark px-3 py-2" id="fileNameBadge">
+                                            <i class="fa-solid fa-image me-1"></i> Current Product Image
+                                        </span>
+                                        <button type="button" class="btn btn-dark btn-sm rounded-pill" onclick="event.stopPropagation(); document.getElementById('imageFileInput').click();">
+                                            <i class="fa-solid fa-arrows-rotate me-1"></i> Change Image
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div id="emptyUploadState" class="@(!string.IsNullOrEmpty(Model.Img) ? "d-none" : "")">
+                                    <i class="fa-solid fa-cloud-arrow-up text-warning fs-1 mb-2"></i>
+                                    <h6 class="fw-bold text-dark mb-1">Click to select an image from your device</h6>
+                                    <p class="text-muted small mb-2">Supports JPG, PNG, WEBP, GIF</p>
+                                    <button type="button" class="btn btn-outline-warning text-dark btn-sm px-3 rounded-pill">
+                                        <i class="fa-solid fa-folder-open me-1"></i> Browse Files
+                                    </button>
+                                </div>
                             </div>
+                            <span asp-validation-for="Img" class="text-danger small"></span>
                         </div>
 
                         <!-- Action Buttons -->
@@ -177,34 +206,44 @@
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script>
-        const imgInput = document.getElementById('productImgInput');
+        const fileInput = document.getElementById('imageFileInput');
+        const emptyState = document.getElementById('emptyUploadState');
+        const previewState = document.getElementById('previewUploadState');
         const previewImg = document.getElementById('livePreviewImg');
-        const icon = document.getElementById('placeholderIcon');
-        const text = document.getElementById('placeholderText');
+        const fileNameBadge = document.getElementById('fileNameBadge');
+        const dropzone = document.getElementById('uploadDropzone');
 
-        function updatePreview() {
-            const url = imgInput.value.trim();
-            if (url) {
-                previewImg.src = url;
-                previewImg.onload = function () {
-                    previewImg.classList.remove('d-none');
-                    icon.classList.add('d-none');
-                    text.classList.add('d-none');
+        fileInput.addEventListener('change', function () {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    previewImg.src = e.target.result;
+                    fileNameBadge.innerHTML = `<i class="fa-solid fa-file-image me-1"></i> ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+                    emptyState.classList.add('d-none');
+                    previewState.classList.remove('d-none');
                 };
-                previewImg.onerror = function () {
-                    previewImg.classList.add('d-none');
-                    icon.classList.remove('d-none');
-                    text.classList.remove('d-none');
-                    text.textContent = 'Invalid image URL or unable to load';
-                };
-            } else {
-                previewImg.classList.add('d-none');
-                icon.classList.remove('d-none');
-                text.classList.remove('d-none');
-                text.textContent = 'Image preview will appear here';
+                reader.readAsDataURL(file);
             }
-        }
+        });
 
-        imgInput.addEventListener('input', updatePreview);
+        // Drag & Drop
+        dropzone.addEventListener('dragover', function (e) {
+            e.preventDefault();
+            this.classList.add('dragover');
+        });
+
+        dropzone.addEventListener('dragleave', function () {
+            this.classList.remove('dragover');
+        });
+
+        dropzone.addEventListener('drop', function (e) {
+            e.preventDefault();
+            this.classList.remove('dragover');
+            if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                fileInput.files = e.dataTransfer.files;
+                fileInput.dispatchEvent(new Event('change'));
+            }
+        });
     </script>
 }
