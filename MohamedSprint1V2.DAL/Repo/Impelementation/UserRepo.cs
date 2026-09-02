@@ -19,7 +19,7 @@ namespace MohamedSprint1V2.DAL.Repo.Impelementation
         }
         public async Task<IEnumerable<ApplicationUser>> GetAllUsersAsync()
         {
-            return await Task.FromResult(_userManager.Users.ToList());
+            return await _userManager.Users.ToListAsync();
         }
 
         public async Task<bool> LoginUserAsync(
