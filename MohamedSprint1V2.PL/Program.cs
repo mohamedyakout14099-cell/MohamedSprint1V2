@@ -47,6 +47,17 @@ builder.Services.ConfigureApplicationCookie(options =>
     
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserRepo, UserRepo>();
+
+// Session Configuration
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30); // تنتهي بعد 30 دقيقة خمول
+    options.Cookie.HttpOnly = true;                 // الـ JavaScript لا يستطيع قراءتها
+    options.Cookie.IsEssential = true;              // تشتغل حتى لو المستخدم رفض الـ Cookies
+    options.Cookie.Name = ".MohamedApp.Session";
+});
+
 var app = builder.Build();
 
 // Seed Roles & Default Admin User
@@ -76,8 +87,14 @@ app.UseHttpsRedirection();
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseSession(); // ✅ لازم بعد UseAuthorization
 
 app.MapStaticAssets();
+
+app.MapControllerRoute(
+    name: "areas",
+    pattern: "{area:exists}/{controller=Dashboard}/{action=Index}/{id?}")
+    .WithStaticAssets();
 
 app.MapControllerRoute(
     name: "default",

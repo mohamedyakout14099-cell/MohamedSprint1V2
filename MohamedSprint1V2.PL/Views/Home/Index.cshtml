@@ -1,8 +1,304 @@
+@using MohamedSprint1V2.DLL.ModelVM.Product
+@using MohamedSprint1V2.DLL.ModelVM.Category
+@model List<GetAllProductVM>
+
 @{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Welcome to Mohamed Store";
+    var categories = ViewBag.Categories as List<GetallCategoryVM> ?? new List<GetallCategoryVM>();
+    var featuredProducts = ViewBag.FeaturedProducts as List<GetAllProductVM> ?? Model ?? new List<GetAllProductVM>();
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<style>
+    /* Hero Banner */
+    .store-hero {
+        background: radial-gradient(1100px 500px at 20% -10%, rgba(37, 99, 235, 0.25), transparent 70%), 
+                    linear-gradient(135deg, #0f172a 0%, #1e293b 60%, #0b1120 100%);
+        color: #ffffff;
+        padding: 80px 0 70px;
+        border-radius: 0 0 30px 30px;
+        margin-bottom: 50px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .hero-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: #60a5fa;
+        font-size: 0.85rem;
+        font-weight: 700;
+        padding: 6px 16px;
+        border-radius: 30px;
+        backdrop-filter: blur(8px);
+        margin-bottom: 20px;
+    }
+
+    .hero-title {
+        font-size: clamp(2.2rem, 5vw, 3.5rem);
+        font-weight: 800;
+        line-height: 1.15;
+        letter-spacing: -0.02em;
+        margin-bottom: 20px;
+    }
+
+    .hero-title span {
+        background: linear-gradient(135deg, #60a5fa, #38bdf8);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .hero-subtitle {
+        font-size: 1.15rem;
+        color: #cbd5e1;
+        max-width: 540px;
+        line-height: 1.6;
+        margin-bottom: 32px;
+    }
+
+    /* Category Mini Card */
+    .category-card-box {
+        background: #ffffff;
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 22px 18px;
+        text-align: center;
+        text-decoration: none;
+        color: var(--text-main);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+        transition: all 0.2s ease;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
+    }
+
+    .category-card-box:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 25px rgba(37, 99, 235, 0.12);
+        border-color: #93c5fd;
+        color: var(--primary-color);
+    }
+
+    .category-icon-circle {
+        width: 52px;
+        height: 52px;
+        border-radius: 14px;
+        background: rgba(37, 99, 235, 0.08);
+        color: var(--primary-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.4rem;
+        transition: all 0.2s;
+    }
+
+    .category-card-box:hover .category-icon-circle {
+        background: var(--primary-color);
+        color: #ffffff;
+        transform: scale(1.1);
+    }
+
+    /* Feature Highlights */
+    .feature-card {
+        background: #ffffff;
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 24px;
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        transition: all 0.2s ease;
+    }
+
+    .feature-card:hover {
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.05);
+    }
+
+    .feature-icon-box {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.35rem;
+        flex-shrink: 0;
+    }
+</style>
+
+<!-- Hero Section -->
+<section class="store-hero">
+    <div class="container">
+        <div class="row align-items-center g-5">
+            <div class="col-12 col-lg-7">
+                <div class="hero-badge">
+                    <i class="fa-solid fa-sparkles"></i>
+                    <span>Premium Quality & Best Prices</span>
+                </div>
+                <h1 class="hero-title">
+                    Discover Quality Products for Your <span>Modern Lifestyle</span>
+                </h1>
+                <p class="hero-subtitle">
+                    Explore our curated collection of high quality products with swift delivery, best-in-class support, and secure checkout.
+                </p>
+                <div class="d-flex gap-3 flex-wrap">
+                    <a asp-area="" asp-controller="Store" asp-action="Index" class="btn btn-primary btn-lg rounded-pill px-4 fw-bold shadow">
+                        <i class="fa-solid fa-bag-shopping me-2"></i> Shop All Products
+                    </a>
+                    <a href="#categoriesSection" class="btn btn-outline-light btn-lg rounded-pill px-4 fw-semibold">
+                        Browse Categories &darr;
+                    </a>
+                </div>
+            </div>
+            <div class="col-12 col-lg-5 text-center d-none d-lg-block">
+                <div class="p-4 rounded-4" style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px);">
+                    <i class="fa-solid fa-cart-flatbed-suitcase fa-6x text-primary mb-3"></i>
+                    <h4 class="text-white fw-bold">Online Shopping Made Easy</h4>
+                    <p class="text-muted small mb-0">Browse hundreds of verified products with fast doorstep delivery.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container">
+    <!-- Categories Section -->
+    <section id="categoriesSection" class="mb-5">
+        <div class="d-flex justify-content-between align-items-end mb-4">
+            <div>
+                <span class="text-primary fw-bold text-uppercase small letter-spacing-1">Explore Departments</span>
+                <h2 class="fw-bold mb-0 text-dark">Shop by Category</h2>
+            </div>
+            <a asp-area="" asp-controller="Store" asp-action="Index" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold">
+                View Catalog &rarr;
+            </a>
+        </div>
+
+        @if (categories.Any())
+        {
+            <div class="row g-3">
+                @foreach (var cat in categories)
+                {
+                    <div class="col-6 col-md-4 col-lg-3">
+                        <a asp-area="" asp-controller="Store" asp-action="Index" asp-route-categoryId="@cat.id" class="category-card-box">
+                            <div class="category-icon-circle">
+                                <i class="fa-solid fa-folder-open"></i>
+                            </div>
+                            <div>
+                                <h6 class="fw-bold mb-1">@cat.name</h6>
+                                <small class="text-muted">@(string.IsNullOrEmpty(cat.description) ? "Explore items" : cat.description)</small>
+                            </div>
+                        </a>
+                    </div>
+                }
+            </div>
+        }
+    </section>
+
+    <!-- Featured Products Section -->
+    <section class="mb-5">
+        <div class="d-flex justify-content-between align-items-end mb-4">
+            <div>
+                <span class="text-primary fw-bold text-uppercase small letter-spacing-1">Top Picks</span>
+                <h2 class="fw-bold mb-0 text-dark">Featured Products</h2>
+            </div>
+            <a asp-area="" asp-controller="Store" asp-action="Index" class="btn btn-sm btn-primary rounded-pill px-4 fw-bold">
+                Explore All &rarr;
+            </a>
+        </div>
+
+        @if (featuredProducts.Any())
+        {
+            <div class="row g-4">
+                @foreach (var item in featuredProducts)
+                {
+                    <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                        <div class="product-card">
+                            <a asp-area="" asp-controller="Store" asp-action="Details" asp-route-id="@item.id" class="product-img-wrap d-block">
+                                <img src="@(string.IsNullOrEmpty(item.img) ? "https://placehold.co/400x300?text=" + item.name : item.img)" 
+                                     alt="@item.name" loading="lazy" />
+                            </a>
+                            <div class="product-card-body">
+                                <span class="product-category-tag">Category #@item.categoryId</span>
+                                <h5 class="product-card-title">
+                                    <a asp-area="" asp-controller="Store" asp-action="Details" asp-route-id="@item.id" class="text-decoration-none text-dark">
+                                        @item.name
+                                    </a>
+                                </h5>
+                                <p class="product-card-desc">@(string.IsNullOrEmpty(item.description) ? "High quality product built with finest materials." : item.description)</p>
+                                
+                                <div class="product-card-footer">
+                                    <span class="product-price">$@item.price.ToString("N2")</span>
+                                    <a asp-area="" asp-controller="Store" asp-action="Details" asp-route-id="@item.id" class="btn-view-product">
+                                        View Details
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-5 bg-white rounded-4 border">
+                <i class="fa-solid fa-box-open fa-3x text-muted mb-3 opacity-50"></i>
+                <h5 class="text-dark">No products available at the moment</h5>
+                <p class="text-muted">Please check back soon or explore categories.</p>
+            </div>
+        }
+    </section>
+
+    <!-- Features Highlights Banner -->
+    <section class="mb-5">
+        <div class="row g-3">
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="feature-card">
+                    <div class="feature-icon-box bg-primary-subtle text-primary">
+                        <i class="fa-solid fa-truck-fast"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold mb-1">Fast Delivery</h6>
+                        <small class="text-muted">Direct to your doorstep</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="feature-card">
+                    <div class="feature-icon-box bg-success-subtle text-success">
+                        <i class="fa-solid fa-shield-check"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold mb-1">Secure Payments</h6>
+                        <small class="text-muted">100% encrypted & safe</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="feature-card">
+                    <div class="feature-icon-box bg-warning-subtle text-warning">
+                        <i class="fa-solid fa-award"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold mb-1">Top Quality</h6>
+                        <small class="text-muted">Verified & authentic items</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="feature-card">
+                    <div class="feature-icon-box bg-info-subtle text-info">
+                        <i class="fa-solid fa-headset"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold mb-1">24/7 Support</h6>
+                        <small class="text-muted">Dedicated support team</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 </div>

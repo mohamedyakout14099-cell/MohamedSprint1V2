@@ -1,58 +1,425 @@
+@using Microsoft.AspNetCore.Identity
+@using MohamedSprint1V2.DAL.Entity
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - MohamedSprint1V2.PL</title>
-    <script type="importmap"></script>
+    <title>@ViewData["Title"] - Mohamed Store</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/MohamedSprint1V2.PL.styles.css" asp-append-version="true" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --secondary-color: #0f172a;
+            --accent-gold: #f59e0b;
+            --bg-light: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', 'Tajawal', sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Top Notification Bar */
+        .top-announcement-bar {
+            background: linear-gradient(90deg, #1e293b, #0f172a);
+            color: #cbd5e1;
+            font-size: 0.82rem;
+            padding: 7px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        /* Customer Navigation */
+        .customer-navbar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 14px 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+        }
+
+        .navbar-brand-custom {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 800;
+            font-size: 1.35rem;
+            color: var(--secondary-color);
+            text-decoration: none;
+        }
+
+        .brand-icon-box {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #2563eb, #3b82f6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.15rem;
+            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
+        }
+
+        .nav-link-custom {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: #475569 !important;
+            padding: 8px 16px !important;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .nav-link-custom:hover {
+            color: var(--primary-color) !important;
+            background: rgba(37, 99, 235, 0.06);
+        }
+
+        .nav-link-custom.active {
+            color: var(--primary-color) !important;
+            background: rgba(37, 99, 235, 0.08);
+        }
+
+        /* Admin Switch Button */
+        .btn-admin-portal {
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            color: #f59e0b !important;
+            border: 1px solid rgba(245, 158, 11, 0.4);
+            font-weight: 700;
+            font-size: 0.85rem;
+            padding: 7px 16px;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transition: all 0.2s ease;
+        }
+
+        .btn-admin-portal:hover {
+            background: #090d16;
+            color: #fbbf24 !important;
+            transform: translateY(-1px);
+            border-color: #f59e0b;
+        }
+
+        /* Main Container */
+        .main-content {
+            flex-grow: 1;
+        }
+
+        /* Modern Product Card */
+        .product-card {
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: 18px;
+            overflow: hidden;
+            transition: all 0.25s ease;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            position: relative;
+        }
+
+        .product-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 16px 32px rgba(0, 0, 0, 0.08);
+            border-color: #cbd5e1;
+        }
+
+        .product-img-wrap {
+            position: relative;
+            padding-top: 75%;
+            overflow: hidden;
+            background: #f1f5f9;
+        }
+
+        .product-img-wrap img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+
+        .product-card:hover .product-img-wrap img {
+            transform: scale(1.05);
+        }
+
+        .product-card-body {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .product-category-tag {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 6px;
+        }
+
+        .product-card-title {
+            font-weight: 700;
+            font-size: 1.05rem;
+            color: var(--secondary-color);
+            margin-bottom: 8px;
+            line-height: 1.35;
+        }
+
+        .product-card-desc {
+            font-size: 0.86rem;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            flex-grow: 1;
+        }
+
+        .product-card-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 14px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .product-price {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: #0f172a;
+        }
+
+        .btn-view-product {
+            background: rgba(37, 99, 235, 0.1);
+            color: var(--primary-color);
+            border: none;
+            padding: 8px 14px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .btn-view-product:hover {
+            background: var(--primary-color);
+            color: #ffffff;
+        }
+
+        /* Footer */
+        .store-footer {
+            background: #0f172a;
+            color: #94a3b8;
+            padding: 60px 0 30px;
+            margin-top: 70px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .store-footer h5 {
+            color: #ffffff;
+            font-weight: 700;
+            margin-bottom: 20px;
+            font-size: 1.05rem;
+        }
+
+        .footer-links {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .footer-links li {
+            margin-bottom: 10px;
+        }
+
+        .footer-links a {
+            color: #94a3b8;
+            text-decoration: none;
+            transition: color 0.2s;
+            font-size: 0.9rem;
+        }
+
+        .footer-links a:hover {
+            color: #ffffff;
+        }
+
+        .footer-bottom {
+            padding-top: 30px;
+            margin-top: 40px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            font-size: 0.85rem;
+        }
+    </style>
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">MohamedSprint1V2.PL</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Auth" asp-action="Index">Users</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Product" asp-action="Index">Products</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Category" asp-action="Index">Categories</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
+    <!-- Top Announcement Bar -->
+    <div class="top-announcement-bar">
+        <div class="container d-flex justify-content-between align-items-center">
+            <div>
+                <i class="fa-solid fa-truck-fast text-warning me-2"></i>
+                <span>Fast & Reliable Delivery Across All Regions</span>
+            </div>
+            <div class="d-none d-md-flex align-items-center gap-3">
+                <span><i class="fa-solid fa-headset me-1 text-primary"></i> 24/7 Support</span>
+                <span><i class="fa-solid fa-shield-halved me-1 text-success"></i> 100% Secure Shopping</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Navigation Bar -->
+    <nav class="navbar navbar-expand-lg customer-navbar">
+        <div class="container">
+            <a class="navbar-brand navbar-brand-custom" asp-area="" asp-controller="Home" asp-action="Index">
+                <div class="brand-icon-box">
+                    <i class="fa-solid fa-bag-shopping"></i>
+                </div>
+                <span>Mohamed<span class="text-primary">Store</span></span>
+            </a>
+
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCustomerContent" 
+                    aria-controls="navbarCustomerContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarCustomerContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4 gap-1">
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-custom" asp-area="" asp-controller="Home" asp-action="Index">
+                            <i class="fa-solid fa-house me-1"></i> Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link nav-link-custom" asp-area="" asp-controller="Store" asp-action="Index">
+                            <i class="fa-solid fa-store me-1"></i> Products & Store
+                        </a>
+                    </li>
+                </ul>
+
+                <!-- Right Action Buttons -->
+                <div class="d-flex align-items-center gap-3 flex-wrap">
+                    @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+                    {
+                        <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" class="btn-admin-portal">
+                            <i class="fa-solid fa-gauge-high"></i>
+                            <span>Admin Portal</span>
+                        </a>
+                    }
+
                     <partial name="_LoginPartial" />
                 </div>
             </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
+        </div>
+    </nav>
+
+    <!-- Main Body Container -->
+    <div class="main-content">
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="container mt-3">
+                <div class="alert alert-success alert-dismissible fade show rounded-4 shadow-sm" role="alert">
+                    <i class="fa-solid fa-circle-check me-2"></i>
+                    @TempData["SuccessMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            </div>
+        }
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="container mt-3">
+                <div class="alert alert-danger alert-dismissible fade show rounded-4 shadow-sm" role="alert">
+                    <i class="fa-solid fa-triangle-exclamation me-2"></i>
+                    @TempData["ErrorMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            </div>
+        }
+
+        @RenderBody()
     </div>
 
-    <footer class="border-top footer text-muted">
+    <!-- Store Footer -->
+    <footer class="store-footer">
         <div class="container">
-            &copy; 2026 - MohamedSprint1V2.PL - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            <div class="row g-4">
+                <div class="col-12 col-md-4">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <div class="brand-icon-box">
+                            <i class="fa-solid fa-bag-shopping"></i>
+                        </div>
+                        <span class="fs-4 fw-bold text-white">Mohamed<span class="text-primary">Store</span></span>
+                    </div>
+                    <p class="text-muted small pe-md-4">
+                        Your ultimate shopping destination for premium quality products, top electronics, lifestyle goods, and dependable customer service.
+                    </p>
+                </div>
+
+                <div class="col-6 col-md-2">
+                    <h5>Quick Links</h5>
+                    <ul class="footer-links">
+                        <li><a asp-area="" asp-controller="Home" asp-action="Index">Home</a></li>
+                        <li><a asp-area="" asp-controller="Store" asp-action="Index">All Products</a></li>
+                        <li><a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy Policy</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-6 col-md-3">
+                    <h5>Customer Care</h5>
+                    <ul class="footer-links">
+                        <li><a href="#">Help & FAQs</a></li>
+                        <li><a href="#">Shipping & Returns</a></li>
+                        <li><a href="#">Terms & Conditions</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-12 col-md-3">
+                    <h5>Connect With Us</h5>
+                    <p class="text-muted small">Stay updated on our latest offers and arrivals.</p>
+                    <div class="d-flex gap-2">
+                        <a href="#" class="btn btn-sm btn-outline-light rounded-circle" style="width: 36px; height: 36px;"><i class="fa-brands fa-facebook-f"></i></a>
+                        <a href="#" class="btn btn-sm btn-outline-light rounded-circle" style="width: 36px; height: 36px;"><i class="fa-brands fa-x-twitter"></i></a>
+                        <a href="#" class="btn btn-sm btn-outline-light rounded-circle" style="width: 36px; height: 36px;"><i class="fa-brands fa-instagram"></i></a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-bottom d-flex flex-wrap justify-content-between align-items-center text-muted">
+                <div>&copy; 2026 MohamedStore. All rights reserved.</div>
+                <div>Designed with ASP.NET Core MVC</div>
+            </div>
         </div>
     </footer>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>

@@ -1,0 +1,104 @@
+@using MohamedSprint1V2.DLL.ModelVM.Product
+@model AddProductVM
+
+@{
+    ViewData["Title"] = "Add New Product";
+}
+
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-8">
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h3 class="admin-card-title">
+                    <i class="fa-solid fa-plus-circle text-primary"></i>
+                    Create New Product
+                </h3>
+                <a asp-area="Admin" asp-controller="Product" asp-action="Index" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+                    <i class="fa-solid fa-arrow-left me-1"></i> Back to List
+                </a>
+            </div>
+
+            <form asp-area="Admin" asp-controller="Product" asp-action="Create" method="post" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+                
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-4 rounded-3"></div>
+
+                <div class="row g-3">
+                    <!-- Product Name -->
+                    <div class="col-12 col-md-8">
+                        <label asp-for="Name" class="admin-form-label">Product Name *</label>
+                        <input asp-for="Name" class="form-control admin-form-control" placeholder="e.g. Premium Wireless Headphones" required />
+                        <span asp-validation-for="Name" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Price -->
+                    <div class="col-12 col-md-4">
+                        <label asp-for="Price" class="admin-form-label">Price ($) *</label>
+                        <input asp-for="Price" type="number" step="0.01" min="0" class="form-control admin-form-control" placeholder="0.00" required />
+                        <span asp-validation-for="Price" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Category -->
+                    <div class="col-12 col-md-6">
+                        <label asp-for="CategoryId" class="admin-form-label">Category *</label>
+                        <select asp-for="CategoryId" asp-items="ViewBag.Categories" class="form-select admin-form-control" required>
+                            <option value="">-- Select Category --</option>
+                        </select>
+                        <span asp-validation-for="CategoryId" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Product Image Upload -->
+                    <div class="col-12 col-md-6">
+                        <label class="admin-form-label">Product Image</label>
+                        <input type="file" name="imageFile" id="imageFileInput" accept="image/*" class="form-control admin-form-control" />
+                        <small class="text-muted">Accepts JPG, PNG, WEBP</small>
+                    </div>
+
+                    <!-- Image Preview Area -->
+                    <div class="col-12" id="previewContainer" style="display: none;">
+                        <label class="admin-form-label">Image Preview</label>
+                        <div>
+                            <img id="imagePreview" src="#" alt="Preview" 
+                                 style="max-width: 180px; max-height: 180px; object-fit: cover; border-radius: 12px; border: 2px dashed rgba(255,255,255,0.2); padding: 4px;" />
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="col-12">
+                        <label asp-for="Description" class="admin-form-label">Product Description</label>
+                        <textarea asp-for="Description" rows="4" class="form-control admin-form-control" placeholder="Describe product details, specs, and features..."></textarea>
+                        <span asp-validation-for="Description" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Submit Buttons -->
+                    <div class="col-12 d-flex justify-content-end gap-3 mt-4">
+                        <a asp-area="Admin" asp-controller="Product" asp-action="Index" class="btn btn-outline-secondary rounded-3 px-4">
+                            Cancel
+                        </a>
+                        <button type="submit" class="btn-admin-primary px-4">
+                            <i class="fa-solid fa-save"></i> Save Product
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.getElementById('imageFileInput')?.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    const img = document.getElementById('imagePreview');
+                    img.src = evt.target.result;
+                    document.getElementById('previewContainer').style.display = 'block';
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+    </script>
+}

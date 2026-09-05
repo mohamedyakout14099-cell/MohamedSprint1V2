@@ -1,0 +1,173 @@
+@using MohamedSprint1V2.DLL.ModelVM.Identity
+@using MohamedSprint1V2.DLL.ModelVM.ResponseResult
+@model Response<IEnumerable<AllUserVM>>
+
+@{
+    ViewData["Title"] = "User Accounts Management";
+    var usersList = Model?.result?.ToList() ?? new List<AllUserVM>();
+    var isManager = User.IsInRole("Manager");
+}
+
+<div class="admin-card">
+    <div class="admin-card-header flex-wrap gap-3">
+        <div>
+            <h3 class="admin-card-title">
+                <i class="fa-solid fa-users-gear text-warning"></i>
+                All User Accounts
+            </h3>
+            <span class="text-muted small">Total Registered: <strong>@usersList.Count</strong></span>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <input type="text" id="userSearchInput" class="form-control admin-form-control" style="width: 250px;" 
+                   placeholder="Search user, email, role..." />
+        </div>
+    </div>
+
+    @if (usersList.Any())
+    {
+        <div class="table-responsive">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th style="width: 60px;">User</th>
+                        <th>Name & Email</th>
+                        <th>Location</th>
+                        <th>Role</th>
+                        <th>Account Status</th>
+                        <th class="text-end" style="width: 220px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in usersList)
+                    {
+                        var role = user.Role ?? "User";
+                        var isUserAdmin = role.Equals("Admin", StringComparison.OrdinalIgnoreCase);
+                        var isUserManager = role.Equals("Manager", StringComparison.OrdinalIgnoreCase);
+                        
+                        <tr class="user-row" data-search="@(user.Name?.ToLower() + " " + user.Email?.ToLower() + " " + role.ToLower())">
+                            <td>
+                                @if (user.Img != null && user.Img.Count > 0)
+                                {
+                                    <img src="data:image/jpeg;base64,@(Convert.ToBase64String(user.Img.ToArray()))" 
+                                         alt="@user.Name" 
+                                         style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 1px solid var(--admin-border);" />
+                                }
+                                else
+                                {
+                                    <div class="user-avatar" style="width: 44px; height: 44px; font-size: 1rem;">
+                                        @(string.IsNullOrEmpty(user.Name) ? "U" : user.Name.Substring(0, 1).ToUpper())
+                                    </div>
+                                }
+                            </td>
+                            <td>
+                                <div class="fw-bold text-white fs-6">@user.Name</div>
+                                <small class="text-muted">@user.Email</small>
+                            </td>
+                            <td>
+                                <span class="text-secondary small">
+                                    <i class="fa-solid fa-location-dot me-1"></i>
+                                    @(string.IsNullOrEmpty(user.City) ? "N/A" : user.City) - @(string.IsNullOrEmpty(user.Address) ? "N/A" : user.Address)
+                                </span>
+                            </td>
+                            <td>
+                                @if (isUserManager)
+                                {
+                                    <span class="badge bg-warning text-dark fw-bold px-3 py-1 rounded-pill">
+                                        <i class="fa-solid fa-crown me-1"></i> Manager
+                                    </span>
+                                }
+                                else if (isUserAdmin)
+                                {
+                                    <span class="badge bg-primary fw-bold px-3 py-1 rounded-pill">
+                                        <i class="fa-solid fa-shield-halved me-1"></i> Admin
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary px-3 py-1 rounded-pill">
+                                        <i class="fa-solid fa-user me-1"></i> @role
+                                    </span>
+                                }
+                            </td>
+                            <td>
+                                @if (user.IsDeleted)
+                                {
+                                    <span class="badge bg-danger-subtle text-danger px-3 py-1 rounded-pill fw-semibold">
+                                        <i class="fa-solid fa-user-slash me-1"></i> Inactive (Deleted)
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-success-subtle text-success px-3 py-1 rounded-pill fw-semibold">
+                                        <i class="fa-solid fa-circle-check me-1"></i> Active
+                                    </span>
+                                }
+                            </td>
+                            <td class="text-end">
+                                <div class="d-flex justify-content-end gap-2 align-items-center">
+                                    @if (isManager && !isUserAdmin && !isUserManager)
+                                    {
+                                        <form asp-area="Admin" asp-controller="User" asp-action="MakeAdmin" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="userId" value="@user.Id" />
+                                            <button type="submit" class="btn btn-sm btn-outline-warning rounded-3" 
+                                                    title="Promote to Admin"
+                                                    onclick="return confirm('Promote @user.Name to Admin role?');">
+                                                <i class="fa-solid fa-shield me-1"></i> Promote
+                                            </button>
+                                        </form>
+                                    }
+
+                                    @if (!isUserManager)
+                                    {
+                                        @if (user.IsDeleted)
+                                        {
+                                            <form asp-area="Admin" asp-controller="User" asp-action="Restore" method="post" class="d-inline">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="userId" value="@user.Id" />
+                                                <button type="submit" class="btn btn-sm btn-outline-success rounded-3" title="Restore Account">
+                                                    <i class="fa-solid fa-rotate-left"></i> Restore
+                                                </button>
+                                            </form>
+                                        }
+                                        else
+                                        {
+                                            <form asp-area="Admin" asp-controller="User" asp-action="SoftDelete" method="post" class="d-inline">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="userId" value="@user.Id" />
+                                                <button type="submit" class="btn btn-sm btn-outline-danger rounded-3" 
+                                                        title="Deactivate Account"
+                                                        onclick="return confirm('Deactivate @user.Name account?');">
+                                                    <i class="fa-solid fa-user-xmark"></i> Deactivate
+                                                </button>
+                                            </form>
+                                        }
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-5 text-muted">
+            <i class="fa-solid fa-users-slash fa-3x mb-3 opacity-50"></i>
+            <h5>No user accounts found</h5>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById('userSearchInput')?.addEventListener('input', function(e) {
+            const term = e.target.value.toLowerCase().trim();
+            document.querySelectorAll('.user-row').forEach(row => {
+                const searchData = row.getAttribute('data-search') || '';
+                row.style.display = searchData.includes(term) ? '' : 'none';
+            });
+        });
+    </script>
+}

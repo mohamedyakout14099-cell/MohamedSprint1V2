@@ -4,32 +4,59 @@
 @inject SignInManager<ApplicationUser> SignInManager
 @inject UserManager<ApplicationUser> UserManager
 
-<ul class="navbar-nav">
+<ul class="navbar-nav align-items-center gap-2">
 @if (SignInManager.IsSignedIn(User))
 {
-    <li class="nav-item">
-        <span class="nav-link text-dark fw-semibold">
-            <i class="fa-solid fa-circle-user text-primary me-1"></i> Hello, @(User.Identity?.Name)!
-        </span>
-    </li>
-    <li class="nav-item">
-        <form id="logoutForm" class="form-inline d-inline" asp-controller="Auth" asp-action="Logout" method="post">
-            <button id="logout" type="submit" class="nav-link btn btn-link text-danger border-0 fw-semibold">
-                <i class="fa-solid fa-arrow-right-from-bracket me-1"></i> Logout
-            </button>
-        </form>
+    var userName = User.Identity?.Name ?? "User";
+    <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle text-dark fw-bold d-flex align-items-center gap-2 py-1 px-2 rounded-pill bg-light border" 
+           href="#" id="userAccountDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <span class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center" 
+                  style="width: 30px; height: 30px; font-size: 0.85rem;">
+                @userName.Substring(0, 1).ToUpper()
+            </span>
+            <span class="small me-1">@userName</span>
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 rounded-4 mt-2" aria-labelledby="userAccountDropdown">
+            <li>
+                <div class="dropdown-header">
+                    <div class="fw-bold text-dark">@userName</div>
+                    <small class="text-muted">
+                        @(User.IsInRole("Manager") ? "General Manager" : User.IsInRole("Admin") ? "Administrator" : "Valued Customer")
+                    </small>
+                </div>
+            </li>
+            <li><hr class="dropdown-divider"></li>
+            @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+            {
+                <li>
+                    <a class="dropdown-item text-primary fw-semibold" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">
+                        <i class="fa-solid fa-gauge-high me-2"></i> Admin Panel
+                    </a>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+            }
+            <li>
+                <form id="logoutForm" class="dropdown-item p-0" asp-area="" asp-controller="Auth" asp-action="Logout" method="post">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-link text-danger w-100 text-start px-3 py-2 text-decoration-none fw-semibold">
+                        <i class="fa-solid fa-arrow-right-from-bracket me-2"></i> Logout
+                    </button>
+                </form>
+            </li>
+        </ul>
     </li>
 }
 else
 {
     <li class="nav-item">
-        <a class="nav-link text-dark" id="register" asp-controller="Auth" asp-action="Register">
-            <i class="fa-solid fa-user-plus me-1"></i> Register
+        <a class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-semibold" id="login" asp-area="" asp-controller="Auth" asp-action="Login">
+            <i class="fa-solid fa-arrow-right-to-bracket me-1"></i> Sign In
         </a>
     </li>
     <li class="nav-item">
-        <a class="nav-link text-dark" id="login" asp-controller="Auth" asp-action="Login">
-            <i class="fa-solid fa-arrow-right-to-bracket me-1"></i> Login
+        <a class="btn btn-sm btn-primary rounded-pill px-3 fw-semibold shadow-sm" id="register" asp-area="" asp-controller="Auth" asp-action="Register">
+            <i class="fa-solid fa-user-plus me-1"></i> Register
         </a>
     </li>
 }

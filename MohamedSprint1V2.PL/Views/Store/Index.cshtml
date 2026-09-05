@@ -1,0 +1,138 @@
+@using MohamedSprint1V2.DLL.ModelVM.Product
+@using MohamedSprint1V2.DLL.ModelVM.Category
+@model List<GetAllProductVM>
+
+@{
+    ViewData["Title"] = "Store & Products Catalog";
+    var categories = ViewBag.Categories as List<GetallCategoryVM> ?? new List<GetallCategoryVM>();
+    int? selectedCategory = ViewBag.SelectedCategoryId;
+    string? searchTerm = ViewBag.SearchTerm;
+    string? currentSort = ViewBag.CurrentSort;
+    var productList = Model ?? new List<GetAllProductVM>();
+}
+
+<div class="container py-4">
+    <!-- Header & Breadcrumb -->
+    <div class="row align-items-center mb-4">
+        <div class="col-12 col-md-6">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a asp-area="" asp-controller="Home" asp-action="Index" class="text-decoration-none">Home</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Store Catalog</li>
+                </ol>
+            </nav>
+            <h2 class="fw-bold text-dark mb-0">Browse Products</h2>
+            <small class="text-muted">Showing @productList.Count products</small>
+        </div>
+
+        <!-- Search & Filter Controls -->
+        <div class="col-12 col-md-6 mt-3 mt-md-0">
+            <form asp-area="" asp-controller="Store" asp-action="Index" method="get" class="d-flex gap-2">
+                @if (selectedCategory.HasValue)
+                {
+                    <input type="hidden" name="categoryId" value="@selectedCategory.Value" />
+                }
+                
+                <div class="input-group">
+                    <input type="text" name="search" value="@searchTerm" class="form-control rounded-start-pill ps-3" 
+                           placeholder="Search product name..." />
+                    <button class="btn btn-primary rounded-end-pill px-4" type="submit">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </button>
+                </div>
+
+                <select name="sort" class="form-select rounded-pill" style="max-width: 170px;" onchange="this.form.submit()">
+                    <option value="">Sort by</option>
+                    <option value="price_asc" selected="@(currentSort == "price_asc")">Price: Low to High</option>
+                    <option value="price_desc" selected="@(currentSort == "price_desc")">Price: High to Low</option>
+                    <option value="name_asc" selected="@(currentSort == "name_asc")">Name: A to Z</option>
+                </select>
+            </form>
+        </div>
+    </div>
+
+    <!-- Category Filter Pills -->
+    <div class="d-flex gap-2 overflow-auto pb-3 mb-4 text-nowrap">
+        <a asp-area="" asp-controller="Store" asp-action="Index" asp-route-search="@searchTerm" asp-route-sort="@currentSort"
+           class="btn btn-sm rounded-pill px-3 fw-semibold @(!selectedCategory.HasValue ? "btn-primary" : "btn-outline-secondary bg-white")">
+            All Products
+        </a>
+        @foreach (var cat in categories)
+        {
+            <a asp-area="" asp-controller="Store" asp-action="Index" 
+               asp-route-categoryId="@cat.id" 
+               asp-route-search="@searchTerm"
+               asp-route-sort="@currentSort"
+               class="btn btn-sm rounded-pill px-3 fw-semibold @(selectedCategory == cat.id ? "btn-primary" : "btn-outline-secondary bg-white")">
+                @cat.name
+            </a>
+        }
+    </div>
+
+    <!-- Active Filters Reset Notice -->
+    @if (selectedCategory.HasValue || !string.IsNullOrEmpty(searchTerm))
+    {
+        <div class="d-flex align-items-center gap-2 mb-4 p-2 px-3 bg-white border rounded-pill small">
+            <span class="text-muted">Active filters:</span>
+            @if (selectedCategory.HasValue)
+            {
+                var catName = categories.FirstOrDefault(c => c.id == selectedCategory.Value)?.name ?? "Category #" + selectedCategory;
+                <span class="badge bg-primary rounded-pill">@catName</span>
+            }
+            @if (!string.IsNullOrEmpty(searchTerm))
+            {
+                <span class="badge bg-info text-dark rounded-pill">Search: "@searchTerm"</span>
+            }
+            <a asp-area="" asp-controller="Store" asp-action="Index" class="text-danger ms-auto text-decoration-none fw-bold small">
+                <i class="fa-solid fa-xmark me-1"></i> Clear Filters
+            </a>
+        </div>
+    }
+
+    <!-- Product Grid -->
+    @if (productList.Any())
+    {
+        <div class="row g-4">
+            @foreach (var item in productList)
+            {
+                <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                    <div class="product-card">
+                        <a asp-area="" asp-controller="Store" asp-action="Details" asp-route-id="@item.id" class="product-img-wrap d-block">
+                            <img src="@(string.IsNullOrEmpty(item.img) ? "https://placehold.co/400x300?text=" + item.name : item.img)" 
+                                 alt="@item.name" loading="lazy" />
+                        </a>
+                        <div class="product-card-body">
+                            <span class="product-category-tag">Category #@item.categoryId</span>
+                            <h5 class="product-card-title">
+                                <a asp-area="" asp-controller="Store" asp-action="Details" asp-route-id="@item.id" class="text-decoration-none text-dark">
+                                    @item.name
+                                </a>
+                            </h5>
+                            <p class="product-card-desc">
+                                @(string.IsNullOrEmpty(item.description) ? "Premium quality product." : item.description)
+                            </p>
+                            
+                            <div class="product-card-footer">
+                                <span class="product-price">$@item.price.ToString("N2")</span>
+                                <a asp-area="" asp-controller="Store" asp-action="Details" asp-route-id="@item.id" class="btn-view-product">
+                                    View Details
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-5 bg-white rounded-4 border my-4">
+            <i class="fa-solid fa-box-open fa-3x text-muted mb-3 opacity-50"></i>
+            <h4 class="text-dark fw-bold">No Products Found</h4>
+            <p class="text-muted">We couldn't find any products matching your criteria.</p>
+            <a asp-area="" asp-controller="Store" asp-action="Index" class="btn btn-primary rounded-pill px-4 mt-2">
+                Reset Catalog Filters
+            </a>
+        </div>
+    }
+</div>

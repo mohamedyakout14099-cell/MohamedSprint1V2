@@ -1,0 +1,124 @@
+@using MohamedSprint1V2.DLL.ModelVM.Product
+@using MohamedSprint1V2.DLL.ModelVM.ResponseResult
+@model Response<List<GetAllProductVM>>
+
+@{
+    ViewData["Title"] = "Product Management";
+    var productsList = Model?.result ?? new List<GetAllProductVM>();
+}
+
+<div class="admin-card">
+    <div class="admin-card-header flex-wrap gap-3">
+        <div>
+            <h3 class="admin-card-title">
+                <i class="fa-solid fa-boxes-stacked text-primary"></i>
+                All Products Catalog
+            </h3>
+            <span class="text-muted small">Total Products: <strong>@productsList.Count</strong></span>
+        </div>
+        <div class="d-flex align-items-center gap-3">
+            <a asp-area="Admin" asp-controller="Product" asp-action="Create" class="btn-admin-primary">
+                <i class="fa-solid fa-plus"></i> Add New Product
+            </a>
+        </div>
+    </div>
+
+    <!-- Search & Filter Bar -->
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-md-6">
+            <div class="input-group">
+                <span class="input-group-text bg-dark border-secondary text-muted">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </span>
+                <input type="text" id="adminProductSearch" class="form-control admin-form-control" 
+                       placeholder="Search products by name or description..." />
+            </div>
+        </div>
+    </div>
+
+    @if (productsList.Any())
+    {
+        <div class="table-responsive">
+            <table class="admin-table" id="productsDataTable">
+                <thead>
+                    <tr>
+                        <th style="width: 80px;">Thumbnail</th>
+                        <th>Product Details</th>
+                        <th>Price</th>
+                        <th>Category ID</th>
+                        <th class="text-end" style="width: 160px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in productsList)
+                    {
+                        <tr class="product-row" data-name="@item.name.ToLower()" data-desc="@(item.description?.ToLower() ?? "")">
+                            <td>
+                                <img src="@(string.IsNullOrEmpty(item.img) ? "https://placehold.co/80x80?text=Product" : item.img)" 
+                                     alt="@item.name" 
+                                     style="width: 58px; height: 58px; object-fit: cover; border-radius: 10px; border: 1px solid var(--admin-border);" />
+                            </td>
+                            <td>
+                                <div class="fw-bold text-white fs-6">@item.name</div>
+                                <div class="text-muted small text-truncate" style="max-width: 380px;">
+                                    @(string.IsNullOrEmpty(item.description) ? "No description provided." : item.description)
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge bg-success-subtle text-success fs-6 fw-bold px-3 py-2 rounded-pill">
+                                    $@item.price.ToString("N2")
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge bg-secondary rounded-pill px-3 py-2">
+                                    Cat #@item.categoryId
+                                </span>
+                            </td>
+                            <td class="text-end">
+                                <div class="btn-group">
+                                    <a asp-area="Admin" asp-controller="Product" asp-action="Edit" asp-route-id="@item.id" 
+                                       class="btn btn-sm btn-outline-primary rounded-start-3" title="Edit Product">
+                                        <i class="fa-solid fa-pen-to-square"></i> Edit
+                                    </a>
+                                    <a asp-area="Admin" asp-controller="Product" asp-action="Delete" asp-route-id="@item.id" 
+                                       class="btn btn-sm btn-outline-danger rounded-end-3" title="Delete Product">
+                                        <i class="fa-solid fa-trash-can"></i> Delete
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-5 text-muted">
+            <i class="fa-solid fa-boxes-packing fa-3x mb-3 opacity-50"></i>
+            <h5>No products available</h5>
+            <p>Start by creating your first product item.</p>
+            <a asp-area="Admin" asp-controller="Product" asp-action="Create" class="btn-admin-primary mt-2">
+                <i class="fa-solid fa-plus"></i> Create Product
+            </a>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById('adminProductSearch')?.addEventListener('input', function(e) {
+            const term = e.target.value.toLowerCase().trim();
+            const rows = document.querySelectorAll('.product-row');
+            rows.forEach(row => {
+                const name = row.getAttribute('data-name') || '';
+                const desc = row.getAttribute('data-desc') || '';
+                if (name.includes(term) || desc.includes(term)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    </script>
+}

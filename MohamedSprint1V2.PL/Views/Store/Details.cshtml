@@ -1,0 +1,207 @@
+@using MohamedSprint1V2.DLL.ModelVM.Product
+@model UpdateProductVM
+
+@{
+    ViewData["Title"] = Model.Name + " - Details";
+    var categoryName = ViewBag.CategoryName as string ?? "General";
+    var relatedProducts = ViewBag.RelatedProducts as List<GetAllProductVM> ?? new List<GetAllProductVM>();
+}
+
+<style>
+    .product-detail-img-box {
+        background: #ffffff;
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        overflow: hidden;
+        padding: 16px;
+        text-align: center;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+    }
+
+    .product-detail-img-box img {
+        width: 100%;
+        max-height: 440px;
+        object-fit: contain;
+        border-radius: 12px;
+    }
+
+    .product-info-card {
+        background: #ffffff;
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        padding: 32px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+    }
+
+    .detail-price {
+        font-size: 2.2rem;
+        font-weight: 800;
+        color: #0f172a;
+    }
+
+    .spec-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 16px;
+        border-radius: 12px;
+        background: #f8fafc;
+        margin-bottom: 10px;
+        border: 1px solid var(--border-color);
+    }
+</style>
+
+<div class="container py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-area="" asp-controller="Home" asp-action="Index" class="text-decoration-none">Home</a></li>
+            <li class="breadcrumb-item"><a asp-area="" asp-controller="Store" asp-action="Index" class="text-decoration-none">Store</a></li>
+            <li class="breadcrumb-item">
+                <a asp-area="" asp-controller="Store" asp-action="Index" asp-route-categoryId="@Model.CategoryId" class="text-decoration-none">
+                    @categoryName
+                </a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">@Model.Name</li>
+        </ol>
+    </nav>
+
+    <div class="row g-4 mb-5">
+        <!-- Product Main Image -->
+        <div class="col-12 col-lg-6">
+            <div class="product-detail-img-box">
+                <img src="@(string.IsNullOrEmpty(Model.Img) ? "https://placehold.co/600x500?text=" + Model.Name : Model.Img)" 
+                     alt="@Model.Name" id="mainProductImage" />
+            </div>
+        </div>
+
+        <!-- Product Information & Order Actions -->
+        <div class="col-12 col-lg-6">
+            <div class="product-info-card">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="badge bg-primary-subtle text-primary fw-bold px-3 py-2 rounded-pill">
+                        <i class="fa-solid fa-tag me-1"></i> @categoryName
+                    </span>
+                    <span class="badge bg-success-subtle text-success fw-bold px-3 py-2 rounded-pill">
+                        <i class="fa-solid fa-circle-check me-1"></i> In Stock
+                    </span>
+                </div>
+
+                <h1 class="fw-bold text-dark mb-3 mt-2" style="font-size: 1.85rem;">@Model.Name</h1>
+
+                <div class="detail-price mb-4">
+                    $@Model.Price.ToString("N2")
+                </div>
+
+                <div class="mb-4">
+                    <h6 class="fw-bold text-dark mb-2">Description</h6>
+                    <p class="text-muted leading-relaxed" style="line-height: 1.8;">
+                        @(string.IsNullOrEmpty(Model.Description) ? "This premium product is crafted with the highest standards of quality and durability to ensure an exceptional user experience." : Model.Description)
+                    </p>
+                </div>
+
+                <!-- Quantity & Actions -->
+                <div class="row g-3 align-items-center mb-4">
+                    <div class="col-auto">
+                        <label class="form-label small fw-bold text-muted mb-1">Quantity</label>
+                        <div class="input-group" style="width: 130px;">
+                            <button class="btn btn-outline-secondary" type="button" onclick="changeQty(-1)">-</button>
+                            <input type="number" id="qtyInput" class="form-control text-center" value="1" min="1" max="99" />
+                            <button class="btn btn-outline-secondary" type="button" onclick="changeQty(1)">+</button>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <label class="form-label small fw-bold text-muted mb-1 d-block">&nbsp;</label>
+                        <button class="btn btn-primary w-100 py-2 rounded-pill fw-bold shadow-sm" onclick="addToCartMock('@Model.Name')">
+                            <i class="fa-solid fa-cart-shopping me-2"></i> Add to Cart
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Product Guarantees -->
+                <div class="pt-3 border-top">
+                    <div class="spec-item">
+                        <i class="fa-solid fa-truck text-primary fs-5"></i>
+                        <div>
+                            <div class="fw-bold small text-dark">Free Shipping Available</div>
+                            <small class="text-muted">On orders over $50</small>
+                        </div>
+                    </div>
+                    <div class="spec-item">
+                        <i class="fa-solid fa-rotate-left text-success fs-5"></i>
+                        <div>
+                            <div class="fw-bold small text-dark">30-Day Easy Returns</div>
+                            <small class="text-muted">Hassle-free money back guarantee</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Related Products -->
+    @if (relatedProducts.Any())
+    {
+        <div class="mt-5">
+            <h3 class="fw-bold text-dark mb-4">Related Products in @categoryName</h3>
+            <div class="row g-4">
+                @foreach (var item in relatedProducts)
+                {
+                    <div class="col-12 col-sm-6 col-md-3">
+                        <div class="product-card">
+                            <a asp-area="" asp-controller="Store" asp-action="Details" asp-route-id="@item.id" class="product-img-wrap d-block">
+                                <img src="@(string.IsNullOrEmpty(item.img) ? "https://placehold.co/400x300?text=" + item.name : item.img)" 
+                                     alt="@item.name" loading="lazy" />
+                            </a>
+                            <div class="product-card-body">
+                                <h6 class="product-card-title">
+                                    <a asp-area="" asp-controller="Store" asp-action="Details" asp-route-id="@item.id" class="text-decoration-none text-dark">
+                                        @item.name
+                                    </a>
+                                </h6>
+                                <div class="product-card-footer mt-auto">
+                                    <span class="product-price fs-6">$@item.price.ToString("N2")</span>
+                                    <a asp-area="" asp-controller="Store" asp-action="Details" asp-route-id="@item.id" class="btn-view-product">
+                                        View
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Add to cart toast -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 9999;">
+    <div id="cartToast" class="toast align-items-center text-bg-dark border-0 rounded-4" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body">
+                <i class="fa-solid fa-circle-check text-success me-2"></i>
+                <span id="toastMsg">Product added to cart!</span>
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function changeQty(delta) {
+            const input = document.getElementById('qtyInput');
+            let val = parseInt(input.value) || 1;
+            val = Math.max(1, Math.min(99, val + delta));
+            input.value = val;
+        }
+
+        function addToCartMock(name) {
+            const qty = document.getElementById('qtyInput').value;
+            document.getElementById('toastMsg').innerText = `Added ${qty}x "${name}" to your cart!`;
+            const toastEl = document.getElementById('cartToast');
+            const toast = new bootstrap.Toast(toastEl, { delay: 3500 });
+            toast.show();
+        }
+    </script>
+}

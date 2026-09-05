@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using MohamedSprint1V2.DAL.Entity;
 using MohamedSprint1V2.DLL.ModelVM.Identity;
 using MohamedSprint1V2.DLL.Service.Abstraction;
 
@@ -8,79 +10,28 @@ namespace MohamedSprint1V2.PL.Controllers
     public class AuthController : Controller
     {
         private readonly IAuthService _authService;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public AuthController(IAuthService authService)
+        public AuthController(IAuthService authService, UserManager<ApplicationUser> userManager)
         {
             _authService = authService;
+            _userManager = userManager;
         }
 
         [Authorize(Roles = "Manager,Admin")]
         [HttpGet]
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            var users = await _authService.GetAllUSers();
-            return View(users);
+            // Redirect to the dedicated Admin Area user management
+            return RedirectToAction("Index", "User", new { area = "Admin" });
         }
 
-        [Authorize(Roles = "Manager")]
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> MakeAdmin(string userId)
-        {
-            var result = await _authService.MakeAdmin(userId);
-            if (result.Successornot)
-            {
-                TempData["SuccessMessage"] = "User successfully promoted to Admin.";
-            }
-            else
-            {
-                TempData["ErrorMessage"] = result.Message ?? "Failed to promote user to Admin.";
-            }
-            return RedirectToAction(nameof(Index));
-        }
-
-        [Authorize(Roles = "Manager,Admin")]
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SoftDelete(string userId)
-        {
-            var result = await _authService.SoftDeleteUser(userId);
-            if (result.Successornot)
-            {
-                TempData["SuccessMessage"] = "User account deactivated (soft-deleted).";
-            }
-            else
-            {
-                TempData["ErrorMessage"] = result.Message ?? "Failed to deactivate user.";
-            }
-            return RedirectToAction(nameof(Index));
-        }
-
-        [Authorize(Roles = "Manager,Admin")]
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Restore(string userId)
-        {
-            var result = await _authService.RestoreUser(userId);
-            if (result.Successornot)
-            {
-                TempData["SuccessMessage"] = "User account restored successfully.";
-            }
-            else
-            {
-                TempData["ErrorMessage"] = result.Message ?? "Failed to restore user.";
-            }
-            return RedirectToAction(nameof(Index));
-        }
-
-        
         [HttpGet]
         public IActionResult Register()
         {
             return View();
         }
 
-        
         [HttpPost]
         public async Task<IActionResult> RegisterAsync(RegisterVM registerVM, IFormFile? imageFile)
         {
@@ -95,19 +46,19 @@ namespace MohamedSprint1V2.PL.Controllers
 
             if (!ModelState.IsValid)
             {
-                return View(registerVM);
+                return View("Register", registerVM);
             }
+
             var result = await _authService.Register(registerVM);
             if (result.Successornot)
             {
-                // Registration successful, redirect to login
+                TempData["SuccessMessage"] = "Registration successful! Please login to your account.";
                 return RedirectToAction("Login", "Auth");
             }
             else
             {
-                // Registration failed, display error message
                 ModelState.AddModelError(string.Empty, result.Message ?? "Registration failed.");
-                return View(registerVM);
+                return View("Register", registerVM);
             }
         }
 
@@ -135,14 +86,21 @@ namespace MohamedSprint1V2.PL.Controllers
                     return Redirect(returnUrl);
                 }
 
-                var normalizedInput = (loginVm.Email ?? "").Trim().ToLower();
-                if (normalizedInput == "admin" || normalizedInput == "admin@admin.com" || 
-                    normalizedInput == "manager" || normalizedInput == "manager@manager.com")
+                // Check logged in user's roles
+                var user = await _userManager.FindByEmailAsync(loginVm.Email) 
+                           ?? await _userManager.FindByNameAsync(loginVm.Email);
+
+                if (user != null)
                 {
-                    return RedirectToAction("Index", "Auth");
+                    var roles = await _userManager.GetRolesAsync(user);
+                    if (roles.Contains("Admin") || roles.Contains("Manager"))
+                    {
+                        return RedirectToAction("Index", "Dashboard", new { area = "Admin" });
+                    }
                 }
 
-                return RedirectToAction("Index", "Product");
+                // Regular customer redirection
+                return RedirectToAction("Index", "Home");
             }
 
             ModelState.AddModelError(string.Empty, result.Message ?? "Invalid login attempt.");
