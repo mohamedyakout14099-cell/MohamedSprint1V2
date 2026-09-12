@@ -100,23 +100,25 @@
                     </p>
                 </div>
 
-                <!-- Quantity & Actions -->
-                <div class="row g-3 align-items-center mb-4">
-                    <div class="col-auto">
-                        <label class="form-label small fw-bold text-muted mb-1">Quantity</label>
-                        <div class="input-group" style="width: 130px;">
-                            <button class="btn btn-outline-secondary" type="button" onclick="changeQty(-1)">-</button>
-                            <input type="number" id="qtyInput" class="form-control text-center" value="1" min="1" max="99" />
-                            <button class="btn btn-outline-secondary" type="button" onclick="changeQty(1)">+</button>
+                <form asp-controller="Cart" asp-action="Add" method="post">
+                    <input type="hidden" name="productId" value="@Model.Id" />
+                    <div class="row g-3 align-items-center mb-4">
+                        <div class="col-auto">
+                            <label class="form-label small fw-bold text-muted mb-1">Quantity</label>
+                            <div class="input-group" style="width: 130px;">
+                                <button class="btn btn-outline-secondary" type="button" onclick="changeQty(-1)">-</button>
+                                <input type="number" id="qtyInput" name="quantity" class="form-control text-center" value="1" min="1" max="99" />
+                                <button class="btn btn-outline-secondary" type="button" onclick="changeQty(1)">+</button>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <label class="form-label small fw-bold text-muted mb-1 d-block">&nbsp;</label>
+                            <button type="submit" class="btn btn-primary w-100 py-2 rounded-pill fw-bold shadow-sm">
+                                <i class="fa-solid fa-cart-shopping me-2"></i> Add to Cart
+                            </button>
                         </div>
                     </div>
-                    <div class="col">
-                        <label class="form-label small fw-bold text-muted mb-1 d-block">&nbsp;</label>
-                        <button class="btn btn-primary w-100 py-2 rounded-pill fw-bold shadow-sm" onclick="addToCartMock('@Model.Name')">
-                            <i class="fa-solid fa-cart-shopping me-2"></i> Add to Cart
-                        </button>
-                    </div>
-                </div>
+                </form>
 
                 <!-- Product Guarantees -->
                 <div class="pt-3 border-top">

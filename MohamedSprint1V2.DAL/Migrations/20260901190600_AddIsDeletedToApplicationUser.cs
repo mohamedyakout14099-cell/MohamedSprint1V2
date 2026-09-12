@@ -10,12 +10,12 @@ namespace MohamedSprint1V2.DAL.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<bool>(
-                name: "IsDeleted",
-                table: "AspNetUsers",
-                type: "bit",
-                nullable: false,
-                defaultValue: false);
+            // migrationBuilder.AddColumn<bool>(
+            //     name: "IsDeleted",
+            //     table: "AspNetUsers",
+            //     type: "bit",
+            //     nullable: false,
+            //     defaultValue: false);
         }
 
         /// <inheritdoc />

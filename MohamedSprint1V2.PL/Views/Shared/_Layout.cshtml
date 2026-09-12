@@ -335,6 +335,27 @@
                         </a>
                     }
 
+                <!-- Cart Button -->
+                    <a asp-controller="Cart" asp-action="Index" class="btn btn-outline-primary rounded-pill px-3 position-relative" title="My Cart">
+                        <i class="fa-solid fa-cart-shopping"></i>
+                        @{
+                            var cartCount = 0;
+                            try
+                            {
+                                var cartSvc = Context.RequestServices.GetService<MohamedSprint1V2.DLL.Service.Abstraction.ICartService>();
+                                var currentCart = cartSvc?.GetCartWithItems();
+                                cartCount = currentCart?.CartItems?.Count ?? 0;
+                            }
+                            catch { }
+                        }
+                        @if (cartCount > 0)
+                        {
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size:0.65rem;">
+                                @cartCount
+                            </span>
+                        }
+                    </a>
+
                     <partial name="_LoginPartial" />
                 </div>
             </div>

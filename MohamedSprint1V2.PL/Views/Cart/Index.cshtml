@@ -1,0 +1,159 @@
+@using MohamedSprint1V2.DAL.Entity
+@model Cart
+
+@{
+    ViewData["Title"] = "My Cart";
+    var cartItems = Model?.CartItems?.ToList() ?? new List<CartItem>();
+    decimal total = cartItems.Sum(ci => (ci.Product?.Price ?? 0) * ci.Quantity);
+}
+
+<div class="container py-4">
+    <!-- Header -->
+    <div class="row align-items-center mb-4">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index" class="text-decoration-none">Home</a></li>
+                    <li class="breadcrumb-item"><a asp-controller="Store" asp-action="Index" class="text-decoration-none">Store</a></li>
+                    <li class="breadcrumb-item active">My Cart</li>
+                </ol>
+            </nav>
+            <h2 class="fw-bold text-dark mb-0">
+                <i class="fa-solid fa-cart-shopping me-2"></i>My Cart
+                <span class="badge bg-primary fs-6 ms-2">@cartItems.Count</span>
+            </h2>
+        </div>
+    </div>
+
+    <!-- Alerts -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show rounded-3" role="alert">
+            <i class="fa-solid fa-circle-check me-2"></i>@TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show rounded-3" role="alert">
+            <i class="fa-solid fa-circle-exclamation me-2"></i>@TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (!cartItems.Any())
+    {
+        <!-- Empty Cart -->
+        <div class="text-center py-5 bg-white rounded-4 border my-4">
+            <i class="fa-solid fa-cart-shopping fa-4x text-muted mb-3 opacity-40"></i>
+            <h4 class="fw-bold text-dark">Your cart is empty</h4>
+            <p class="text-muted">Looks like you haven't added any products yet.</p>
+            <a asp-controller="Store" asp-action="Index" class="btn btn-primary rounded-pill px-5 mt-2">
+                <i class="fa-solid fa-store me-2"></i>Browse Store
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            <!-- Cart Items -->
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-body p-0">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-4 py-3" style="width:50%">Product</th>
+                                    <th class="text-center py-3">Price</th>
+                                    <th class="text-center py-3">Quantity</th>
+                                    <th class="text-center py-3">Subtotal</th>
+                                    <th class="pe-4 py-3"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in cartItems)
+                                {
+                                    var subtotal = (item.Product?.Price ?? 0) * item.Quantity;
+                                    <tr>
+                                        <td class="ps-4 py-3">
+                                            <div class="d-flex align-items-center gap-3">
+                                                <img src="@(string.IsNullOrEmpty(item.Product?.Img) ? "https://placehold.co/60x60?text=IMG" : item.Product.Img)"
+                                                     alt="@item.Product?.Name" width="60" height="60"
+                                                     class="rounded-3 object-fit-cover border" />
+                                                <div>
+                                                    <div class="fw-semibold text-dark">@(item.Product?.Name ?? "Unknown Product")</div>
+                                                    <small class="text-muted">ID: #@item.ProductId</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="fw-semibold text-primary">$@((item.Product?.Price ?? 0).ToString("N2"))</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge bg-light text-dark border fs-6 px-3 py-2">@item.Quantity</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="fw-bold text-dark">$@subtotal.ToString("N2")</span>
+                                        </td>
+                                        <td class="pe-4 text-center">
+                                            <form asp-controller="Cart" asp-action="Remove" method="post">
+                                                <input type="hidden" name="cartItemId" value="@item.Id" />
+                                                <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3"
+                                                        onclick="return confirm('Remove this item?')">
+                                                    <i class="fa-solid fa-trash-can"></i>
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="card-footer bg-white border-top-0 d-flex justify-content-between align-items-center px-4 py-3">
+                        <a asp-controller="Store" asp-action="Index" class="btn btn-outline-secondary rounded-pill px-4">
+                            <i class="fa-solid fa-arrow-left me-2"></i>Continue Shopping
+                        </a>
+                        <form asp-controller="Cart" asp-action="Clear" method="post">
+                            <button type="submit" class="btn btn-outline-danger rounded-pill px-4"
+                                    onclick="return confirm('Clear all items from your cart?')">
+                                <i class="fa-solid fa-broom me-2"></i>Clear Cart
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Summary -->
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm rounded-4 sticky-top" style="top: 80px;">
+                    <div class="card-header bg-primary text-white rounded-top-4 py-3">
+                        <h5 class="mb-0 fw-bold"><i class="fa-solid fa-receipt me-2"></i>Order Summary</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between mb-2 text-muted">
+                            <span>Items (@cartItems.Count)</span>
+                            <span>$@total.ToString("N2")</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2 text-muted">
+                            <span>Shipping</span>
+                            <span class="text-success fw-semibold">Free</span>
+                        </div>
+                        <hr />
+                        <div class="d-flex justify-content-between fw-bold fs-5 text-dark">
+                            <span>Total</span>
+                            <span class="text-primary">$@total.ToString("N2")</span>
+                        </div>
+                        <div class="d-grid mt-4">
+                            <a href="#" class="btn btn-primary btn-lg rounded-pill fw-semibold">
+                                <i class="fa-solid fa-lock me-2"></i>Proceed to Checkout
+                            </a>
+                        </div>
+                        <p class="text-center text-muted small mt-3 mb-0">
+                            <i class="fa-solid fa-shield-halved me-1"></i>Secure &amp; encrypted checkout
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>

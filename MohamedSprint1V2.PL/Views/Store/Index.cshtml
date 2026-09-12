@@ -114,9 +114,18 @@
                             
                             <div class="product-card-footer">
                                 <span class="product-price">$@item.price.ToString("N2")</span>
-                                <a asp-area="" asp-controller="Store" asp-action="Details" asp-route-id="@item.id" class="btn-view-product">
-                                    View Details
-                                </a>
+                                <div class="d-flex gap-2 align-items-center">
+                                    <a asp-area="" asp-controller="Store" asp-action="Details" asp-route-id="@item.id" class="btn-view-product">
+                                        View Details
+                                    </a>
+                                    <form asp-controller="Cart" asp-action="Add" method="post">
+                                        <input type="hidden" name="productId" value="@item.id" />
+                                        <input type="hidden" name="quantity" value="1" />
+                                        <button type="submit" class="btn btn-sm btn-primary rounded-3 px-3 py-2" title="Add to Cart">
+                                            <i class="fa-solid fa-cart-plus"></i>
+                                        </button>
+                                    </form>
+                                </div>
                             </div>
                         </div>
                     </div>
