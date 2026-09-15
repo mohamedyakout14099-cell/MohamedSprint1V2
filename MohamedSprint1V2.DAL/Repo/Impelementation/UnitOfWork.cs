@@ -1,4 +1,4 @@
-﻿ using System;
+ using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -13,9 +13,13 @@ namespace MohamedSprint1V2.DAL.Repo.Impelementation
             this.context = context;
             Category = new CategoryRepo(context);
             Product= new ProductRepo(context);
+            Cart = new CartRepo(context);
+            CartItem = new CartItemRepo(context);
         }
         public ICategoryRepo Category{ get;private set;  }
         public IProductRepo Product { get; private set; }
+        public ICartRepo Cart { get; private set; }
+        public ICartItemRepo CartItem { get; private set; }
         public int Save()
         {
             return context.SaveChanges();

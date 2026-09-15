@@ -1,0 +1,56 @@
+@using MohamedSprint1V2.DLL.ModelVM.Category
+@model UpdaeteCategoryVM
+
+@{
+    ViewData["Title"] = "Edit Category: " + Model.Name;
+}
+
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-6">
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h3 class="admin-card-title">
+                    <i class="fa-solid fa-pen-to-square text-success"></i>
+                    Edit Category
+                </h3>
+                <a asp-area="Admin" asp-controller="Category" asp-action="Index" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+                    <i class="fa-solid fa-arrow-left me-1"></i> Back to List
+                </a>
+            </div>
+
+            <form asp-area="Admin" asp-controller="Category" asp-action="Edit" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="Id" />
+                
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-4 rounded-3"></div>
+
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label asp-for="Name" class="admin-form-label">Category Name *</label>
+                        <input asp-for="Name" class="form-control admin-form-control" required />
+                        <span asp-validation-for="Name" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-12">
+                        <label asp-for="Description" class="admin-form-label">Description (Optional)</label>
+                        <textarea asp-for="Description" rows="4" class="form-control admin-form-control"></textarea>
+                        <span asp-validation-for="Description" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-12 d-flex justify-content-end gap-3 mt-4">
+                        <a asp-area="Admin" asp-controller="Category" asp-action="Index" class="btn btn-outline-secondary rounded-3 px-4">
+                            Cancel
+                        </a>
+                        <button type="submit" class="btn-admin-primary px-4">
+                            <i class="fa-solid fa-check"></i> Update Category
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,106 @@
+@using MohamedSprint1V2.DLL.ModelVM.Category
+@using MohamedSprint1V2.DLL.ModelVM.ResponseResult
+@using MohamedSprint1V2.DLL.ModelVM.Pagination
+@model Response<PagedList<GetallCategoryVM>>
+
+@{
+    ViewData["Title"] = "Category Management";
+    var pagedResult = Model?.result;
+    var categories = pagedResult?.Items ?? new List<GetallCategoryVM>();
+    string? searchTerm = ViewBag.SearchTerm;
+}
+
+<div class="admin-card">
+    <div class="admin-card-header flex-wrap gap-3">
+        <div>
+            <h3 class="admin-card-title">
+                <i class="fa-solid fa-layer-group text-success"></i>
+                All Categories
+            </h3>
+            <span class="text-muted small">Total Categories: <strong>@(pagedResult?.TotalCount ?? 0)</strong></span>
+        </div>
+        <div>
+            <a asp-area="Admin" asp-controller="Category" asp-action="Create" class="btn-admin-primary">
+                <i class="fa-solid fa-plus"></i> Add New Category
+            </a>
+        </div>
+    </div>
+
+    <!-- Search & Filter Bar -->
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-md-6">
+            <form asp-area="Admin" asp-controller="Category" asp-action="Index" method="get">
+                <div class="input-group">
+                    <span class="input-group-text bg-dark border-secondary text-muted">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </span>
+                    <input type="text" name="search" value="@searchTerm" class="form-control admin-form-control" 
+                           placeholder="Search category name or description..." />
+                    <button type="submit" class="btn btn-outline-secondary">Search</button>
+                    @if (!string.IsNullOrEmpty(searchTerm))
+                    {
+                        <a asp-area="Admin" asp-controller="Category" asp-action="Index" class="btn btn-outline-danger">Clear</a>
+                    }
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @if (categories.Any())
+    {
+        <div class="table-responsive">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th style="width: 80px;">#ID</th>
+                        <th>Category Name</th>
+                        <th>Description</th>
+                        <th class="text-end" style="width: 160px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var cat in categories)
+                    {
+                        <tr>
+                            <td>
+                                <span class="badge bg-secondary rounded-pill px-3 py-2">#@cat.id</span>
+                            </td>
+                            <td>
+                                <div class="fw-bold text-white fs-6">@cat.name</div>
+                            </td>
+                            <td>
+                                <span class="text-muted">@(string.IsNullOrEmpty(cat.description) ? "—" : cat.description)</span>
+                            </td>
+                            <td class="text-end">
+                                <div class="btn-group">
+                                    <a asp-area="Admin" asp-controller="Category" asp-action="Edit" asp-route-id="@cat.id" 
+                                       class="btn btn-sm btn-outline-primary rounded-start-3" title="Edit Category">
+                                        <i class="fa-solid fa-pen-to-square"></i> Edit
+                                    </a>
+                                    <a asp-area="Admin" asp-controller="Category" asp-action="Delete" asp-route-id="@cat.id" 
+                                       class="btn btn-sm btn-outline-danger rounded-end-3" title="Delete Category">
+                                        <i class="fa-solid fa-trash-can"></i> Delete
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <partial name="_Pagination" model="pagedResult" />
+    }
+    else
+    {
+        <div class="text-center py-5 text-muted">
+            <i class="fa-solid fa-layer-group fa-3x mb-3 opacity-50"></i>
+            <h5>No categories created yet</h5>
+            <p>Add departments or categories to organize store products.</p>
+            <a asp-area="Admin" asp-controller="Category" asp-action="Create" class="btn-admin-primary mt-2">
+                <i class="fa-solid fa-plus"></i> Add Category
+            </a>
+        </div>
+    }
+</div>
+

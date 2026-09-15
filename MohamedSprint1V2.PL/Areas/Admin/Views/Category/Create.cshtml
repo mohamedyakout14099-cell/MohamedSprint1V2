@@ -1,0 +1,55 @@
+@using MohamedSprint1V2.DLL.ModelVM.Category
+@model AddCategoryVM
+
+@{
+    ViewData["Title"] = "Add New Category";
+}
+
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-6">
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h3 class="admin-card-title">
+                    <i class="fa-solid fa-folder-plus text-success"></i>
+                    Create New Category
+                </h3>
+                <a asp-area="Admin" asp-controller="Category" asp-action="Index" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+                    <i class="fa-solid fa-arrow-left me-1"></i> Back to List
+                </a>
+            </div>
+
+            <form asp-area="Admin" asp-controller="Category" asp-action="Create" method="post">
+                @Html.AntiForgeryToken()
+                
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger mb-4 rounded-3"></div>
+
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label asp-for="Name" class="admin-form-label">Category Name *</label>
+                        <input asp-for="Name" class="form-control admin-form-control" placeholder="e.g. Electronics, Clothing, Books" required />
+                        <span asp-validation-for="Name" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-12">
+                        <label asp-for="Description" class="admin-form-label">Description (Optional)</label>
+                        <textarea asp-for="Description" rows="4" class="form-control admin-form-control" placeholder="Brief explanation of this category..."></textarea>
+                        <span asp-validation-for="Description" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-12 d-flex justify-content-end gap-3 mt-4">
+                        <a asp-area="Admin" asp-controller="Category" asp-action="Index" class="btn btn-outline-secondary rounded-3 px-4">
+                            Cancel
+                        </a>
+                        <button type="submit" class="btn-admin-primary px-4">
+                            <i class="fa-solid fa-save"></i> Save Category
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

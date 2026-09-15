@@ -1,0 +1,114 @@
+@using MohamedSprint1V2.DLL.ModelVM.Pagination
+@model IPagedList
+
+@{
+    if (Model == null || Model.TotalPages <= 1)
+    {
+        return;
+    }
+
+    var action = ViewData["Action"]?.ToString() ?? ViewContext.RouteData.Values["action"]?.ToString() ?? "Index";
+    var controller = ViewData["Controller"]?.ToString() ?? ViewContext.RouteData.Values["controller"]?.ToString();
+    var area = ViewData["Area"]?.ToString() ?? ViewContext.RouteData.Values["area"]?.ToString();
+
+    // Prepare route values dictionary to preserve existing query parameters
+    var routeValues = new Dictionary<string, string>();
+    foreach (var key in Context.Request.Query.Keys)
+    {
+        if (key.Equals("pageNumber", StringComparison.OrdinalIgnoreCase)) continue;
+        var value = Context.Request.Query[key].ToString();
+        if (!string.IsNullOrEmpty(value))
+        {
+            routeValues[key] = value;
+        }
+    }
+
+    int startItem = ((Model.PageIndex - 1) * Model.PageSize) + 1;
+    int endItem = Math.Min(Model.PageIndex * Model.PageSize, Model.TotalCount);
+
+    int maxPagesToShow = 5;
+    int startPage = Math.Max(1, Model.PageIndex - 2);
+    int endPage = Math.Min(Model.TotalPages, startPage + maxPagesToShow - 1);
+
+    if (endPage - startPage + 1 < maxPagesToShow)
+    {
+        startPage = Math.Max(1, endPage - maxPagesToShow + 1);
+    }
+}
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3 mt-4 pt-3 border-top">
+    <div class="text-muted small">
+        Showing <span class="fw-semibold text-dark">@startItem</span> to <span class="fw-semibold text-dark">@endItem</span> of <span class="fw-semibold text-dark">@Model.TotalCount</span> items
+    </div>
+
+    <nav aria-label="Page navigation">
+        <ul class="pagination pagination-sm m-0">
+            <!-- First Page -->
+            <li class="page-item @(!Model.HasPreviousPage ? "disabled" : "")">
+                @{
+                    var firstRoute = new Dictionary<string, string>(routeValues) { ["pageNumber"] = "1" };
+                }
+                <a class="page-item-link page-link rounded-start-pill" asp-area="@area" asp-controller="@controller" asp-action="@action" asp-all-route-data="@firstRoute" aria-label="First">
+                    <i class="fa-solid fa-angles-left small"></i>
+                </a>
+            </li>
+
+            <!-- Previous Page -->
+            <li class="page-item @(!Model.HasPreviousPage ? "disabled" : "")">
+                @{
+                    var prevRoute = new Dictionary<string, string>(routeValues) { ["pageNumber"] = (Model.PageIndex - 1).ToString() };
+                }
+                <a class="page-link" asp-area="@area" asp-controller="@controller" asp-action="@action" asp-all-route-data="@prevRoute" aria-label="Previous">
+                    <i class="fa-solid fa-angle-left small"></i>
+                </a>
+            </li>
+
+            <!-- Ellipsis Before -->
+            @if (startPage > 1)
+            {
+                <li class="page-item disabled">
+                    <span class="page-link">...</span>
+                </li>
+            }
+
+            <!-- Numeric Page Buttons -->
+            @for (int p = startPage; p <= endPage; p++)
+            {
+                var pRoute = new Dictionary<string, string>(routeValues) { ["pageNumber"] = p.ToString() };
+                <li class="page-item @(p == Model.PageIndex ? "active" : "")">
+                    <a class="page-link" asp-area="@area" asp-controller="@controller" asp-action="@action" asp-all-route-data="@pRoute">
+                        @p
+                    </a>
+                </li>
+            }
+
+            <!-- Ellipsis After -->
+            @if (endPage < Model.TotalPages)
+            {
+                <li class="page-item disabled">
+                    <span class="page-link">...</span>
+                </li>
+            }
+
+            <!-- Next Page -->
+            <li class="page-item @(!Model.HasNextPage ? "disabled" : "")">
+                @{
+                    var nextRoute = new Dictionary<string, string>(routeValues) { ["pageNumber"] = (Model.PageIndex + 1).ToString() };
+                }
+                <a class="page-link" asp-area="@area" asp-controller="@controller" asp-action="@action" asp-all-route-data="@nextRoute" aria-label="Next">
+                    <i class="fa-solid fa-angle-right small"></i>
+                </a>
+            </li>
+
+            <!-- Last Page -->
+            <li class="page-item @(!Model.HasNextPage ? "disabled" : "")">
+                @{
+                    var lastRoute = new Dictionary<string, string>(routeValues) { ["pageNumber"] = Model.TotalPages.ToString() };
+                }
+                <a class="page-link rounded-end-pill" asp-area="@area" asp-controller="@controller" asp-action="@action" asp-all-route-data="@lastRoute" aria-label="Last">
+                    <i class="fa-solid fa-angles-right small"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</div>

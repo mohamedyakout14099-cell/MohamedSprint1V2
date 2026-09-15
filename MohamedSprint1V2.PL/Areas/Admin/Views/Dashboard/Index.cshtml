@@ -1,0 +1,263 @@
+@{
+    ViewData["Title"] = "Dashboard Overview";
+    var recentProducts = ViewBag.RecentProducts as List<GetAllProductVM> ?? new List<GetAllProductVM>();
+    int totalProducts = ViewBag.TotalProducts ?? 0;
+    int totalCategories = ViewBag.TotalCategories ?? 0;
+    int totalUsers = ViewBag.TotalUsers ?? 0;
+}
+
+<style>
+    .stat-card {
+        background: var(--admin-card);
+        border: 1px solid var(--admin-border);
+        border-radius: 16px;
+        padding: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 25px rgba(0, 0, 0, 0.35);
+    }
+
+    .stat-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.6rem;
+    }
+
+    .stat-icon.products {
+        background: rgba(59, 130, 246, 0.15);
+        color: #3b82f6;
+        border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+
+    .stat-icon.categories {
+        background: rgba(16, 185, 129, 0.15);
+        color: #10b981;
+        border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .stat-icon.users {
+        background: rgba(245, 158, 11, 0.15);
+        color: #f59e0b;
+        border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .stat-number {
+        font-size: 2.1rem;
+        font-weight: 800;
+        color: #ffffff;
+        line-height: 1.2;
+    }
+
+    .stat-label {
+        font-size: 0.88rem;
+        color: var(--admin-text-muted);
+        font-weight: 600;
+    }
+
+    .quick-action-btn {
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid var(--admin-border);
+        color: #f8fafc;
+        border-radius: 12px;
+        padding: 16px 20px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.2s;
+    }
+
+    .quick-action-btn:hover {
+        background: rgba(59, 130, 246, 0.15);
+        border-color: rgba(59, 130, 246, 0.4);
+        color: #ffffff;
+        transform: translateX(4px);
+    }
+
+    .quick-action-icon {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.06);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+    }
+</style>
+
+<div class="row g-4 mb-4">
+    <!-- Stat 1: Products -->
+    <div class="col-12 col-md-4">
+        <div class="stat-card">
+            <div>
+                <div class="stat-label">Total Products</div>
+                <div class="stat-number">@totalProducts</div>
+            </div>
+            <div class="stat-icon products">
+                <i class="fa-solid fa-box-open"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stat 2: Categories -->
+    <div class="col-12 col-md-4">
+        <div class="stat-card">
+            <div>
+                <div class="stat-label">Total Categories</div>
+                <div class="stat-number">@totalCategories</div>
+            </div>
+            <div class="stat-icon categories">
+                <i class="fa-solid fa-layer-group"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stat 3: Users -->
+    <div class="col-12 col-md-4">
+        <div class="stat-card">
+            <div>
+                <div class="stat-label">Registered Accounts</div>
+                <div class="stat-number">@totalUsers</div>
+            </div>
+            <div class="stat-icon users">
+                <i class="fa-solid fa-users"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Recent Products Table -->
+    <div class="col-12 col-lg-8">
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h3 class="admin-card-title">
+                    <i class="fa-solid fa-clock-rotate-left text-primary"></i>
+                    Recent Products
+                </h3>
+                <a asp-area="Admin" asp-controller="Product" asp-action="Index" class="btn btn-sm btn-outline-light rounded-pill px-3">
+                    View All Products &rarr;
+                </a>
+            </div>
+
+            @if (recentProducts.Any())
+            {
+                <div class="table-responsive">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Price</th>
+                                <th class="text-end">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in recentProducts)
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <img src="@(string.IsNullOrEmpty(item.img) ? "https://placehold.co/50" : item.img)" 
+                                                 alt="@item.name" 
+                                                 style="width: 44px; height: 44px; object-fit: cover; border-radius: 8px; border: 1px solid var(--admin-border);" />
+                                            <div>
+                                                <div class="fw-bold text-white">@item.name</div>
+                                                <small class="text-muted text-truncate d-inline-block" style="max-width: 250px;">
+                                                    @(string.IsNullOrEmpty(item.description) ? "No description" : item.description)
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="fw-bold text-warning">$@item.price.ToString("N2")</span>
+                                    </td>
+                                    <td class="text-end">
+                                        <a asp-area="Admin" asp-controller="Product" asp-action="Edit" asp-route-id="@item.id" 
+                                           class="btn btn-sm btn-outline-primary rounded-3">
+                                            <i class="fa-solid fa-pen-to-square"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5 text-muted">
+                    <i class="fa-solid fa-box-open fa-3x mb-3 opacity-50"></i>
+                    <p>No products found yet.</p>
+                    <a asp-area="Admin" asp-controller="Product" asp-action="Create" class="btn btn-admin-primary">
+                        <i class="fa-solid fa-plus"></i> Add First Product
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Quick Shortcuts -->
+    <div class="col-12 col-lg-4">
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h3 class="admin-card-title">
+                    <i class="fa-solid fa-bolt text-warning"></i>
+                    Quick Management
+                </h3>
+            </div>
+            <div class="d-flex flex-column gap-3">
+                <a asp-area="Admin" asp-controller="Product" asp-action="Create" class="quick-action-btn">
+                    <div class="quick-action-icon text-primary">
+                        <i class="fa-solid fa-plus"></i>
+                    </div>
+                    <div>
+                        <div class="text-white">Add New Product</div>
+                        <small class="text-muted">Create product with image & price</small>
+                    </div>
+                </a>
+
+                <a asp-area="Admin" asp-controller="Category" asp-action="Create" class="quick-action-btn">
+                    <div class="quick-action-icon text-success">
+                        <i class="fa-solid fa-folder-plus"></i>
+                    </div>
+                    <div>
+                        <div class="text-white">Add New Category</div>
+                        <small class="text-muted">Create department or taxonomy</small>
+                    </div>
+                </a>
+
+                <a asp-area="Admin" asp-controller="User" asp-action="Index" class="quick-action-btn">
+                    <div class="quick-action-icon text-warning">
+                        <i class="fa-solid fa-users-gear"></i>
+                    </div>
+                    <div>
+                        <div class="text-white">Manage User Roles</div>
+                        <small class="text-muted">Promote admins & view accounts</small>
+                    </div>
+                </a>
+
+                <a asp-area="" asp-controller="Home" asp-action="Index" target="_blank" class="quick-action-btn">
+                    <div class="quick-action-icon text-info">
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                    </div>
+                    <div>
+                        <div class="text-white">Customer Storefront</div>
+                        <small class="text-muted">Preview shopping experience</small>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,571 @@
+@using Microsoft.AspNetCore.Identity
+@using MohamedSprint1V2.DAL.Entity
+@inject UserManager<ApplicationUser> UserManager
+@inject SignInManager<ApplicationUser> SignInManager
+
+@{
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+    var userName = User.Identity?.Name ?? "Admin";
+    var isManager = User.IsInRole("Manager");
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Admin Portal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <style>
+        :root {
+            --admin-bg: #0f172a;
+            --admin-card: #1e293b;
+            --admin-sidebar: #090d16;
+            --admin-sidebar-hover: #1e293b;
+            --admin-accent: #3b82f6;
+            --admin-accent-hover: #2563eb;
+            --admin-gold: #f59e0b;
+            --admin-border: rgba(255, 255, 255, 0.08);
+            --admin-text-muted: #94a3b8;
+            --admin-text-light: #f8fafc;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', 'Tajawal', sans-serif;
+            background-color: #0b1120;
+            color: #f1f5f9;
+            min-height: 100vh;
+            display: flex;
+            overflow-x: hidden;
+            margin: 0;
+        }
+
+        /* Sidebar */
+        .admin-sidebar {
+            width: 270px;
+            background: var(--admin-sidebar);
+            border-right: 1px solid var(--admin-border);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 1000;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-brand {
+            padding: 24px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid var(--admin-border);
+            text-decoration: none;
+        }
+
+        .sidebar-brand-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.25rem;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.35);
+        }
+
+        .sidebar-brand-text {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: #ffffff;
+            letter-spacing: -0.3px;
+        }
+
+        .sidebar-brand-badge {
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 6px;
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--admin-gold);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            text-transform: uppercase;
+        }
+
+        .sidebar-nav {
+            padding: 20px 14px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            overflow-y: auto;
+        }
+
+        .nav-section-title {
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #64748b;
+            padding: 10px 12px 4px;
+        }
+
+        .admin-nav-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 16px;
+            color: var(--admin-text-muted);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.92rem;
+            border-radius: 10px;
+            transition: all 0.2s ease;
+        }
+
+        .admin-nav-item i {
+            font-size: 1.1rem;
+            width: 22px;
+            text-align: center;
+            transition: transform 0.2s ease;
+        }
+
+        .admin-nav-item:hover {
+            color: #ffffff;
+            background: var(--admin-sidebar-hover);
+        }
+
+        .admin-nav-item:hover i {
+            transform: scale(1.1);
+        }
+
+        .admin-nav-item.active {
+            color: #ffffff;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.25), rgba(37, 99, 235, 0.15));
+            border: 1px solid rgba(59, 130, 246, 0.35);
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.15);
+        }
+
+        .admin-nav-item.active i {
+            color: #60a5fa;
+        }
+
+        .sidebar-footer {
+            padding: 18px 16px;
+            border-top: 1px solid var(--admin-border);
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .user-profile-badge {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--admin-border);
+            margin-bottom: 12px;
+        }
+
+        .user-avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: #1e1b4b;
+            font-size: 0.95rem;
+        }
+
+        .user-info {
+            flex-grow: 1;
+            overflow: hidden;
+        }
+
+        .user-info-name {
+            font-weight: 700;
+            font-size: 0.88rem;
+            color: #ffffff;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+        }
+
+        .user-info-role {
+            font-size: 0.72rem;
+            color: var(--admin-gold);
+            font-weight: 600;
+        }
+
+        /* Main Content Wrapper */
+        .admin-main-wrapper {
+            margin-left: 270px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background: #0b1120;
+        }
+
+        /* Top Header */
+        .admin-topbar {
+            height: 72px;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--admin-border);
+            padding: 0 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 900;
+        }
+
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .topbar-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin: 0;
+            color: #ffffff;
+        }
+
+        .topbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .btn-view-store {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--admin-border);
+            color: #cbd5e1;
+            text-decoration: none;
+            font-size: 0.88rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn-view-store:hover {
+            background: rgba(255, 255, 255, 0.12);
+            color: #ffffff;
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Content Area */
+        .admin-content {
+            padding: 30px;
+            flex-grow: 1;
+        }
+
+        /* Card Component */
+        .admin-card {
+            background: var(--admin-card);
+            border-radius: 16px;
+            border: 1px solid var(--admin-border);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .admin-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--admin-border);
+        }
+
+        .admin-card-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Tables */
+        .admin-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 8px;
+        }
+
+        .admin-table th {
+            color: #94a3b8;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--admin-border);
+        }
+
+        .admin-table td {
+            background: rgba(30, 41, 59, 0.7);
+            padding: 14px 16px;
+            vertical-align: middle;
+            color: #e2e8f0;
+            font-size: 0.92rem;
+            border-top: 1px solid var(--admin-border);
+            border-bottom: 1px solid var(--admin-border);
+        }
+
+        .admin-table tr td:first-child {
+            border-left: 1px solid var(--admin-border);
+            border-top-left-radius: 10px;
+            border-bottom-left-radius: 10px;
+        }
+
+        .admin-table tr td:last-child {
+            border-right: 1px solid var(--admin-border);
+            border-top-right-radius: 10px;
+            border-bottom-right-radius: 10px;
+        }
+
+        .admin-table tr:hover td {
+            background: rgba(51, 65, 85, 0.6);
+        }
+
+        /* Forms */
+        .admin-form-control {
+            background: #0f172a;
+            border: 1px solid var(--admin-border);
+            color: #ffffff;
+            border-radius: 10px;
+            padding: 12px 16px;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+        }
+
+        .admin-form-control:focus {
+            background: #0f172a;
+            border-color: var(--admin-accent);
+            color: #ffffff;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+        }
+
+        .admin-form-label {
+            color: #cbd5e1;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+        }
+
+        /* Buttons */
+        .btn-admin-primary {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: #ffffff;
+            border: none;
+            padding: 10px 22px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.92rem;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .btn-admin-primary:hover {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: #ffffff;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(59, 130, 246, 0.35);
+        }
+
+        /* Alerts */
+        .admin-alert {
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            font-weight: 500;
+        }
+
+        .admin-alert-success {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #6ee7b7;
+        }
+
+        .admin-alert-danger {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+        }
+
+        /* Mobile Sidebar Toggle */
+        .mobile-toggle-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: #ffffff;
+            font-size: 1.4rem;
+            cursor: pointer;
+        }
+
+        @@media (max-width: 991.98px) {
+            .admin-sidebar {
+                transform: translateX(-100%);
+            }
+
+            .admin-sidebar.show {
+                transform: translateX(0);
+            }
+
+            .admin-main-wrapper {
+                margin-left: 0;
+            }
+
+            .mobile-toggle-btn {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Admin Sidebar -->
+    <aside class="admin-sidebar" id="adminSidebar">
+        <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" class="sidebar-brand">
+            <div class="sidebar-brand-icon">
+                <i class="fa-solid fa-shield-halved"></i>
+            </div>
+            <div>
+                <div class="sidebar-brand-text">Admin Panel</div>
+                <span class="sidebar-brand-badge">@(isManager ? "Manager" : "Administrator")</span>
+            </div>
+        </a>
+
+        <div class="sidebar-nav">
+            <div class="nav-section-title">Overview</div>
+            <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" 
+               class="admin-nav-item @(currentController == "Dashboard" ? "active" : "")">
+                <i class="fa-solid fa-gauge-high"></i>
+                <span>Dashboard</span>
+            </a>
+
+            <div class="nav-section-title">Catalog Management</div>
+            <a asp-area="Admin" asp-controller="Product" asp-action="Index" 
+               class="admin-nav-item @(currentController == "Product" ? "active" : "")">
+                <i class="fa-solid fa-boxes-stacked"></i>
+                <span>Products</span>
+            </a>
+            <a asp-area="Admin" asp-controller="Category" asp-action="Index" 
+               class="admin-nav-item @(currentController == "Category" ? "active" : "")">
+                <i class="fa-solid fa-layer-group"></i>
+                <span>Categories</span>
+            </a>
+
+            <div class="nav-section-title">Administration</div>
+            <a asp-area="Admin" asp-controller="User" asp-action="Index" 
+               class="admin-nav-item @(currentController == "User" ? "active" : "")">
+                <i class="fa-solid fa-users-gear"></i>
+                <span>User Accounts</span>
+            </a>
+        </div>
+
+        <div class="sidebar-footer">
+            <div class="user-profile-badge">
+                <div class="user-avatar">
+                    @userName.Substring(0, 1).ToUpper()
+                </div>
+                <div class="user-info">
+                    <div class="user-info-name">@userName</div>
+                    <div class="user-info-role">@(isManager ? "General Manager" : "Administrator")</div>
+                </div>
+            </div>
+            <form asp-area="" asp-controller="Auth" asp-action="Logout" method="post" class="d-grid">
+                <button type="submit" class="btn btn-sm btn-outline-danger w-100 rounded-3">
+                    <i class="fa-solid fa-arrow-right-from-bracket me-1"></i> Sign Out
+                </button>
+            </form>
+        </div>
+    </aside>
+
+    <!-- Main Wrapper -->
+    <div class="admin-main-wrapper">
+        <header class="admin-topbar">
+            <div class="topbar-left">
+                <button class="mobile-toggle-btn" id="sidebarToggle" type="button">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <h1 class="topbar-title">@ViewData["Title"]</h1>
+            </div>
+            <div class="topbar-actions">
+                <a asp-area="" asp-controller="Home" asp-action="Index" class="btn-view-store">
+                    <i class="fa-solid fa-store text-primary"></i>
+                    <span>View Customer Store</span>
+                </a>
+            </div>
+        </header>
+
+        <main class="admin-content">
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="admin-alert admin-alert-success alert alert-dismissible fade show" role="alert">
+                    <div>
+                        <i class="fa-solid fa-circle-check me-2"></i>
+                        @TempData["SuccessMessage"]
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="admin-alert admin-alert-danger alert alert-dismissible fade show" role="alert">
+                    <div>
+                        <i class="fa-solid fa-triangle-exclamation me-2"></i>
+                        @TempData["ErrorMessage"]
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            @RenderBody()
+        </main>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.getElementById('sidebarToggle')?.addEventListener('click', function() {
+            document.getElementById('adminSidebar')?.classList.toggle('show');
+        });
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
