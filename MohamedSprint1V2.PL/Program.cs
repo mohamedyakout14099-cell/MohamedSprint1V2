@@ -50,7 +50,8 @@ builder.Services.ConfigureApplicationCookie(options =>
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserRepo, UserRepo>();
 
-// Session Configuration
+// Caching & Session Configuration
+builder.Services.AddMemoryCache();
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
