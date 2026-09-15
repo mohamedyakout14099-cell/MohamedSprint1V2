@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using MohamedSprint1V2.DLL.ModelVM.Category;
 using MohamedSprint1V2.DLL.ModelVM.Product;
+using MohamedSprint1V2.DLL.ModelVM.Pagination;
+using MohamedSprint1V2.DLL.ModelVM.ResponseResult;
 using MohamedSprint1V2.DLL.Service.Abstraction;
 
 namespace MohamedSprint1V2.PL.Areas.Admin.Controllers
@@ -32,14 +34,28 @@ namespace MohamedSprint1V2.PL.Areas.Admin.Controllers
             ViewBag.Categories = new SelectList(list, "id", "name", selectedId);
         }
 
-        public IActionResult Index()
+        public IActionResult Index(string? search, int pageNumber = 1, int pageSize = 10)
         {
             var result = productService.GetAllProducts();
             if (!result.Successornot)
             {
                 TempData["ErrorMessage"] = result.Message;
             }
-            return View(result);
+
+            var list = result?.result ?? new List<GetAllProductVM>();
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var term = search.Trim().ToLower();
+                list = list.Where(p => 
+                    (p.name != null && p.name.ToLower().Contains(term)) ||
+                    (p.description != null && p.description.ToLower().Contains(term))
+                ).ToList();
+                ViewBag.SearchTerm = search;
+            }
+
+            var pagedList = PagedList<GetAllProductVM>.Create(list, pageNumber, pageSize);
+            var response = new Response<PagedList<GetAllProductVM>>(pagedList, result?.Message, result?.Successornot ?? false);
+            return View(response);
         }
 
         [HttpGet]

@@ -1,5 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MohamedSprint1V2.DLL.ModelVM.Identity;
+using MohamedSprint1V2.DLL.ModelVM.Pagination;
+using MohamedSprint1V2.DLL.ModelVM.ResponseResult;
 using MohamedSprint1V2.DLL.Service.Abstraction;
 
 namespace MohamedSprint1V2.PL.Areas.Admin.Controllers
@@ -16,10 +19,26 @@ namespace MohamedSprint1V2.PL.Areas.Admin.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string? search, int pageNumber = 1, int pageSize = 10)
         {
-            var users = await _authService.GetAllUSers();
-            return View(users);
+            var usersResponse = await _authService.GetAllUSers();
+            var list = usersResponse?.result?.ToList() ?? new List<AllUserVM>();
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var term = search.Trim().ToLower();
+                list = list.Where(u =>
+                    (u.Name != null && u.Name.ToLower().Contains(term)) ||
+                    (u.Email != null && u.Email.ToLower().Contains(term)) ||
+                    (u.Role != null && u.Role.ToLower().Contains(term)) ||
+                    (u.City != null && u.City.ToLower().Contains(term))
+                ).ToList();
+                ViewBag.SearchTerm = search;
+            }
+
+            var pagedList = PagedList<AllUserVM>.Create(list, pageNumber, pageSize);
+            var response = new Response<PagedList<AllUserVM>>(pagedList, usersResponse?.Message, usersResponse?.Successornot ?? false);
+            return View(response);
         }
 
         [Authorize(Roles = "Manager")]

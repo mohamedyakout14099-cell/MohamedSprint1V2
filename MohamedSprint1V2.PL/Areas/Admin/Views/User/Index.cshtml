@@ -1,11 +1,14 @@
 @using MohamedSprint1V2.DLL.ModelVM.Identity
 @using MohamedSprint1V2.DLL.ModelVM.ResponseResult
-@model Response<IEnumerable<AllUserVM>>
+@using MohamedSprint1V2.DLL.ModelVM.Pagination
+@model Response<PagedList<AllUserVM>>
 
 @{
     ViewData["Title"] = "User Accounts Management";
-    var usersList = Model?.result?.ToList() ?? new List<AllUserVM>();
+    var pagedResult = Model?.result;
+    var usersList = pagedResult?.Items ?? new List<AllUserVM>();
     var isManager = User.IsInRole("Manager");
+    string? searchTerm = ViewBag.SearchTerm;
 }
 
 <div class="admin-card">
@@ -15,11 +18,23 @@
                 <i class="fa-solid fa-users-gear text-warning"></i>
                 All User Accounts
             </h3>
-            <span class="text-muted small">Total Registered: <strong>@usersList.Count</strong></span>
+            <span class="text-muted small">Total Registered: <strong>@(pagedResult?.TotalCount ?? 0)</strong></span>
         </div>
         <div class="d-flex align-items-center gap-2">
-            <input type="text" id="userSearchInput" class="form-control admin-form-control" style="width: 250px;" 
-                   placeholder="Search user, email, role..." />
+            <form asp-area="Admin" asp-controller="User" asp-action="Index" method="get" class="d-flex gap-2">
+                <div class="input-group" style="max-width: 320px;">
+                    <span class="input-group-text bg-dark border-secondary text-muted">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </span>
+                    <input type="text" name="search" value="@searchTerm" class="form-control admin-form-control" 
+                           placeholder="Search user, email, role..." />
+                    <button type="submit" class="btn btn-outline-secondary">Search</button>
+                    @if (!string.IsNullOrEmpty(searchTerm))
+                    {
+                        <a asp-area="Admin" asp-controller="User" asp-action="Index" class="btn btn-outline-danger">Clear</a>
+                    }
+                </div>
+            </form>
         </div>
     </div>
 
@@ -44,7 +59,7 @@
                         var isUserAdmin = role.Equals("Admin", StringComparison.OrdinalIgnoreCase);
                         var isUserManager = role.Equals("Manager", StringComparison.OrdinalIgnoreCase);
                         
-                        <tr class="user-row" data-search="@(user.Name?.ToLower() + " " + user.Email?.ToLower() + " " + role.ToLower())">
+                        <tr class="user-row">
                             <td>
                                 @if (user.Img != null && user.Img.Count > 0)
                                 {
@@ -150,6 +165,8 @@
                 </tbody>
             </table>
         </div>
+
+        <partial name="_Pagination" model="pagedResult" />
     }
     else
     {
@@ -160,14 +177,3 @@
     }
 </div>
 
-@section Scripts {
-    <script>
-        document.getElementById('userSearchInput')?.addEventListener('input', function(e) {
-            const term = e.target.value.toLowerCase().trim();
-            document.querySelectorAll('.user-row').forEach(row => {
-                const searchData = row.getAttribute('data-search') || '';
-                row.style.display = searchData.includes(term) ? '' : 'none';
-            });
-        });
-    </script>
-}

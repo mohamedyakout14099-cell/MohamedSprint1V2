@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MohamedSprint1V2.DLL.ModelVM.Category;
+using MohamedSprint1V2.DLL.ModelVM.Pagination;
+using MohamedSprint1V2.DLL.ModelVM.ResponseResult;
 using MohamedSprint1V2.DLL.Service.Abstraction;
 
 namespace MohamedSprint1V2.PL.Areas.Admin.Controllers
@@ -16,14 +18,28 @@ namespace MohamedSprint1V2.PL.Areas.Admin.Controllers
             this.categoryService = categoryService;
         }
 
-        public IActionResult Index()
+        public IActionResult Index(string? search, int pageNumber = 1, int pageSize = 10)
         {
             var result = categoryService.getAllCategories();
             if (!result.Successornot)
             {
                 TempData["ErrorMessage"] = result.Message;
             }
-            return View(result);
+
+            var list = result?.result ?? new List<GetallCategoryVM>();
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var term = search.Trim().ToLower();
+                list = list.Where(c => 
+                    (c.name != null && c.name.ToLower().Contains(term)) ||
+                    (c.description != null && c.description.ToLower().Contains(term))
+                ).ToList();
+                ViewBag.SearchTerm = search;
+            }
+
+            var pagedList = PagedList<GetallCategoryVM>.Create(list, pageNumber, pageSize);
+            var response = new Response<PagedList<GetallCategoryVM>>(pagedList, result?.Message, result?.Successornot ?? false);
+            return View(response);
         }
 
         [HttpGet]

@@ -1,6 +1,7 @@
 @using MohamedSprint1V2.DLL.ModelVM.Product
 @using MohamedSprint1V2.DLL.ModelVM.Category
-@model List<GetAllProductVM>
+@using MohamedSprint1V2.DLL.ModelVM.Pagination
+@model PagedList<GetAllProductVM>
 
 @{
     ViewData["Title"] = "Store & Products Catalog";
@@ -8,7 +9,7 @@
     int? selectedCategory = ViewBag.SelectedCategoryId;
     string? searchTerm = ViewBag.SearchTerm;
     string? currentSort = ViewBag.CurrentSort;
-    var productList = Model ?? new List<GetAllProductVM>();
+    var productList = Model?.Items ?? new List<GetAllProductVM>();
 }
 
 <div class="container py-4">
@@ -22,7 +23,7 @@
                 </ol>
             </nav>
             <h2 class="fw-bold text-dark mb-0">Browse Products</h2>
-            <small class="text-muted">Showing @productList.Count products</small>
+            <small class="text-muted">Showing @productList.Count of @(Model?.TotalCount ?? 0) products</small>
         </div>
 
         <!-- Search & Filter Controls -->
@@ -132,6 +133,8 @@
                 </div>
             }
         </div>
+
+        <partial name="_Pagination" model="Model" />
     }
     else
     {
@@ -145,3 +148,4 @@
         </div>
     }
 </div>
+

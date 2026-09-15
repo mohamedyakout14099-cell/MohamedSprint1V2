@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using MohamedSprint1V2.DLL.ModelVM.Category;
 using MohamedSprint1V2.DLL.ModelVM.Product;
+using MohamedSprint1V2.DLL.ModelVM.Pagination;
 using MohamedSprint1V2.DLL.Service.Abstraction;
 
 namespace MohamedSprint1V2.PL.Controllers
@@ -16,7 +17,7 @@ namespace MohamedSprint1V2.PL.Controllers
             _categoryService = categoryService;
         }
 
-        public IActionResult Index(int? categoryId, string? search, string? sort)
+        public IActionResult Index(int? categoryId, string? search, string? sort, int pageNumber = 1, int pageSize = 8)
         {
             var productsResponse = _productService.GetAllProducts();
             var categoriesResponse = _categoryService.getAllCategories();
@@ -51,9 +52,10 @@ namespace MohamedSprint1V2.PL.Controllers
                 _ => products
             };
             ViewBag.CurrentSort = sort;
-
             ViewBag.Categories = categories;
-            return View(products);
+
+            var pagedProducts = PagedList<GetAllProductVM>.Create(products, pageNumber, pageSize);
+            return View(pagedProducts);
         }
 
         public IActionResult Details(int id)
