@@ -22,6 +22,8 @@ namespace MohamedSprint1V2.DAL.Database.Configurations
             builder.HasOne(p => p.Category)
                 .WithMany()
                 .HasForeignKey(p => p.CategoryId);
+
+            builder.HasQueryFilter(p => !p.IsDeleted);
         }
     }
 }

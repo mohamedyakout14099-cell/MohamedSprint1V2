@@ -36,7 +36,7 @@ namespace MohamedSprint1V2.DAL.Entity
 
         public int CategoryId { get; private set; }
         public Category? Category { get; private set; }
-
+        public bool IsDeleted { get; set; } = false;
         public bool update(string name, string description, string img, decimal price, int categoryId)
         {
             Name = name;

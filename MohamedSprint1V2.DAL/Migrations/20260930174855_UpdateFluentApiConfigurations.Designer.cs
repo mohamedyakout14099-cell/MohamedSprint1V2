@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MohamedSprint1V2.DAL.Database;
 
@@ -11,9 +12,11 @@ using MohamedSprint1V2.DAL.Database;
 namespace MohamedSprint1V2.DAL.Migrations
 {
     [DbContext(typeof(MohamedSprint1V2DbContext))]
-    partial class MohamedSprint1DbContextModelSnapshot : ModelSnapshot
+    [Migration("20260930174855_UpdateFluentApiConfigurations")]
+    partial class UpdateFluentApiConfigurations
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -398,9 +401,6 @@ namespace MohamedSprint1V2.DAL.Migrations
                     b.Property<string>("Img")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -429,9 +429,6 @@ namespace MohamedSprint1V2.DAL.Migrations
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .IsRequired()

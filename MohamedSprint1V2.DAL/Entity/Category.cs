@@ -19,6 +19,7 @@ namespace MohamedSprint1V2.DAL.EntityClasses
         public int Id { get; private set; }
 
         public string Name { get; private set; }
+        public bool IsDeleted { get; set; } = false;
 
         public string Description { get; private set; }
         public DateTime CreatedTime { get; private set; } = DateTime.Now;

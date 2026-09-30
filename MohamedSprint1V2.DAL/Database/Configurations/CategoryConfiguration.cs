@@ -11,6 +11,8 @@ namespace MohamedSprint1V2.DAL.Database.Configurations
 
             builder.Property(c => c.Name)
                 .IsRequired();
+
+            builder.HasQueryFilter(c => !c.IsDeleted);
         }
     }
 }
