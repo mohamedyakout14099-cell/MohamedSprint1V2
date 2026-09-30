@@ -1,4 +1,4 @@
-﻿using MohamedSprint1V2.DAL.Entity;
+using MohamedSprint1V2.DAL.Entity;
 
 namespace MohamedSprint1V2.DAL.Entity
 {
@@ -9,10 +9,9 @@ namespace MohamedSprint1V2.DAL.Entity
 
         public string ApplicationUserId { get; private set; }
 
-        [ValidateNever]
         public ApplicationUser ApplicationUser { get; private set; }
 
-        public DateTime OrderDate { get; private    set; }
+        public DateTime OrderDate { get; private set; }
         public DateTime ShippingDate { get; private set; }
 
         public decimal TotalPrice { get; private set; }
@@ -21,7 +20,7 @@ namespace MohamedSprint1V2.DAL.Entity
         public string? PaymentStatus { get; private set; }
 
         public string? TrakcingNumber { get; private set; }
-        public string? Carrier { get;private set; }
+        public string? Carrier { get; private set; }
 
         public DateTime PaymentDate { get; private set; }
 
@@ -35,6 +34,5 @@ namespace MohamedSprint1V2.DAL.Entity
         public string Address { get; private set; }
         public string City { get; private set; }
         public string? PhoneNumber { get; private set; }
-
     }
 }

@@ -18,7 +18,6 @@ namespace MohamedSprint1V2.DAL.EntityClasses
 
         public int Id { get; private set; }
 
-        [Required]
         public string Name { get; private set; }
 
         public string Description { get; private set; }

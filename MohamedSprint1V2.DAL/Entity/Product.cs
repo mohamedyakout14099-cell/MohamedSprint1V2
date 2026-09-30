@@ -1,4 +1,4 @@
-﻿
+
 
 namespace MohamedSprint1V2.DAL.Entity
 {
@@ -26,34 +26,25 @@ namespace MohamedSprint1V2.DAL.Entity
             Price = price;
             CategoryId = categoryId;
         }
-        [Required]
+
         public string Name { get; private set; }
         public string Description { get; private set; }
 
-        [DisplayName("Image")]
-        [ValidateNever]
-        public string? Img { get; private    set; }
+        public string? Img { get; private set; }
 
-        [Required]
         public decimal Price { get; private set; }
 
-        [Required]
-        [DisplayName("Category")]
         public int CategoryId { get; private set; }
-        [ValidateNever]
         public Category? Category { get; private set; }
+
         public bool update(string name, string description, string img, decimal price, int categoryId)
         {
-           
-                Name = name;
-                Description = description;
-                Img = img;
-                Price = price;
-                CategoryId = categoryId;
-                return true;
-            
-
-        
+            Name = name;
+            Description = description;
+            Img = img;
+            Price = price;
+            CategoryId = categoryId;
+            return true;
         }
     }
 }
