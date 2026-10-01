@@ -18,9 +18,12 @@ namespace MohamedSprint1V2.PL.Areas.Admin.Controllers
             this.categoryService = categoryService;
         }
 
-        public IActionResult Index(string? search, int pageNumber = 1, int pageSize = 10)
+        public IActionResult Index(string? search, int pageNumber = 1, int pageSize = 10, bool showDeleted = false)
         {
-            var result = categoryService.getAllCategories();
+            var result = showDeleted
+                ? categoryService.GetAllCategoriesIncludingDeleted()
+                : categoryService.getAllCategories();
+
             if (!result.Successornot)
             {
                 TempData["ErrorMessage"] = result.Message;
@@ -30,13 +33,14 @@ namespace MohamedSprint1V2.PL.Areas.Admin.Controllers
             if (!string.IsNullOrWhiteSpace(search))
             {
                 var term = search.Trim().ToLower();
-                list = list.Where(c => 
+                list = list.Where(c =>
                     (c.name != null && c.name.ToLower().Contains(term)) ||
                     (c.description != null && c.description.ToLower().Contains(term))
                 ).ToList();
                 ViewBag.SearchTerm = search;
             }
 
+            ViewBag.ShowDeleted = showDeleted;
             var pagedList = PagedList<GetallCategoryVM>.Create(list, pageNumber, pageSize);
             var response = new Response<PagedList<GetallCategoryVM>>(pagedList, result?.Message, result?.Successornot ?? false);
             return View(response);
@@ -102,13 +106,12 @@ namespace MohamedSprint1V2.PL.Areas.Admin.Controllers
         [HttpGet]
         public IActionResult Delete(int id)
         {
-            var result = categoryService.getCategoryById(id);
+            var result = categoryService.GetCategoryByIdIncludingDeleted(id);
             if (!result.Successornot)
             {
                 TempData["ErrorMessage"] = result.Message;
                 return RedirectToAction(nameof(Index));
             }
-
             return View(result.result);
         }
 
@@ -116,16 +119,29 @@ namespace MohamedSprint1V2.PL.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Delete(UpdaeteCategoryVM categoryVM)
         {
-            var result = categoryService.deleteCategoryById(categoryVM.Id);
+            var result = categoryService.SoftDeleteCategory(categoryVM.Id);
 
             if (result.Successornot)
             {
-                TempData["SuccessMessage"] = "Category Deleted Successfully";
+                TempData["SuccessMessage"] = "Category deleted successfully (Soft Delete)";
                 return RedirectToAction(nameof(Index));
             }
 
             TempData["ErrorMessage"] = result.Message;
             return View(categoryVM);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Restore(int id)
+        {
+            var result = categoryService.RestoreCategory(id);
+            if (result.Successornot)
+                TempData["SuccessMessage"] = "Category restored successfully";
+            else
+                TempData["ErrorMessage"] = result.Message;
+
+            return RedirectToAction(nameof(Index), new { showDeleted = true });
         }
     }
 }
