@@ -34,9 +34,12 @@ namespace MohamedSprint1V2.PL.Areas.Admin.Controllers
             ViewBag.Categories = new SelectList(list, "id", "name", selectedId);
         }
 
-        public IActionResult Index(string? search, int pageNumber = 1, int pageSize = 10)
+        public IActionResult Index(string? search, int pageNumber = 1, int pageSize = 10, bool showDeleted = false)
         {
-            var result = productService.GetAllProducts();
+            var result = showDeleted
+                ? productService.GetAllProductsIncludingDeleted()
+                : productService.GetAllProducts();
+
             if (!result.Successornot)
             {
                 TempData["ErrorMessage"] = result.Message;
@@ -46,13 +49,14 @@ namespace MohamedSprint1V2.PL.Areas.Admin.Controllers
             if (!string.IsNullOrWhiteSpace(search))
             {
                 var term = search.Trim().ToLower();
-                list = list.Where(p => 
+                list = list.Where(p =>
                     (p.name != null && p.name.ToLower().Contains(term)) ||
                     (p.description != null && p.description.ToLower().Contains(term))
                 ).ToList();
                 ViewBag.SearchTerm = search;
             }
 
+            ViewBag.ShowDeleted = showDeleted;
             var pagedList = PagedList<GetAllProductVM>.Create(list, pageNumber, pageSize);
             var response = new Response<PagedList<GetAllProductVM>>(pagedList, result?.Message, result?.Successornot ?? false);
             return View(response);
@@ -174,7 +178,7 @@ namespace MohamedSprint1V2.PL.Areas.Admin.Controllers
         [HttpGet]
         public IActionResult Delete(int id)
         {
-            var result = productService.GetProductById(id);
+            var result = productService.GetProductByIdIncludingDeleted(id);
             if (!result.Successornot)
             {
                 TempData["ErrorMessage"] = result.Message;
@@ -185,22 +189,31 @@ namespace MohamedSprint1V2.PL.Areas.Admin.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Delete(UpdateProductVM productVM)
+        public IActionResult Delete(UpdateProductVM productVM)
         {
-            if (!string.IsNullOrEmpty(productVM.Img))
-            {
-                await fileService.DeleteImageAsync(productVM.Img);
-            }
-            var result = productService.DeleteProduct(productVM.Id);
+            var result = productService.SoftDeleteProduct(productVM.Id);
 
             if (result.Successornot)
             {
-                TempData["SuccessMessage"] = "Product Deleted Successfully";
+                TempData["SuccessMessage"] = "Product deleted successfully (Soft Delete)";
                 return RedirectToAction(nameof(Index));
             }
 
             TempData["ErrorMessage"] = result.Message;
             return View(productVM);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Restore(int id)
+        {
+            var result = productService.RestoreProduct(id);
+            if (result.Successornot)
+                TempData["SuccessMessage"] = "Product restored successfully";
+            else
+                TempData["ErrorMessage"] = result.Message;
+
+            return RedirectToAction(nameof(Index), new { showDeleted = true });
         }
     }
 }

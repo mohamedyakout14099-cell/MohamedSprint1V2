@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Caching.Memory;
+ using Microsoft.Extensions.Caching.Memory;
 using MohamedSprint1V2.DLL.ModelVM.Category;
 
 namespace MohamedSprint1V2.DLL.Service.Impelementation
@@ -142,6 +142,94 @@ namespace MohamedSprint1V2.DLL.Service.Impelementation
             catch (Exception ex)
             {
                 return new Response<bool>(false, ex.Message, false);
+            }
+        }
+        public Response<bool> SoftDeleteCategory(int categoryId)
+        {
+            try
+            {
+                var success = unitOfWork.Category.SoftDelete(categoryId);
+                if (!success)
+                    return new Response<bool>(false, "Category not found", false);
+
+                var result = unitOfWork.Save();
+                if (result > 0)
+                {
+                    memoryCache.Remove(CategoriesCacheKey);
+                    memoryCache.Remove(GetCategoryCacheKey(categoryId));
+                    return new Response<bool>(true, "Category soft-deleted successfully", true);
+                }
+                return new Response<bool>(false, "Failed to soft-delete category", false);
+            }
+            catch (Exception ex)
+            {
+                return new Response<bool>(false, ex.Message, false);
+            }
+        }
+
+        public Response<bool> RestoreCategory(int categoryId)
+        {
+            try
+            {
+                var success = unitOfWork.Category.Restore(categoryId);
+                if (!success)
+                    return new Response<bool>(false, "Category not found", false);
+
+                var result = unitOfWork.Save();
+                if (result > 0)
+                {
+                    memoryCache.Remove(CategoriesCacheKey);
+                    memoryCache.Remove(GetCategoryCacheKey(categoryId));
+                    return new Response<bool>(true, "Category restored successfully", true);
+                }
+                return new Response<bool>(false, "Failed to restore category", false);
+            }
+            catch (Exception ex)
+            {
+                return new Response<bool>(false, ex.Message, false);
+            }
+        }
+
+        public Response<List<GetallCategoryVM>> GetAllCategoriesIncludingDeleted()
+        {
+            try
+            {
+                var result = unitOfWork.Category.GetAllIncludingDeleted();
+                if (result != null && result.Count > 0)
+                {
+                    var mapp = result.Select(item => new GetallCategoryVM()
+                    {
+                        id = item.Id,
+                        name = item.Name,
+                        description = item.Description,
+                        CreatedTime = item.CreatedTime,
+                        IsDeleted = item.IsDeleted
+                    }).ToList();
+                    return new Response<List<GetallCategoryVM>>(mapp, null, true);
+                }
+                return new Response<List<GetallCategoryVM>>(null, "No categories found", false);
+            }
+            catch (Exception ex)
+            {
+                return new Response<List<GetallCategoryVM>>(null, ex.Message, false);
+            }
+        }
+
+        public Response<UpdaeteCategoryVM> GetCategoryByIdIncludingDeleted(int categoryId)
+        {
+            try
+            {
+                var result = unitOfWork.Category.GetByIdIgnoreFilter(categoryId);
+                if (result != null)
+                {
+                    var mapp = new UpdaeteCategoryVM() { Id = result.Id, Name = result.Name, Description = result.Description };
+                    return new Response<UpdaeteCategoryVM>(mapp, null, true);
+                }
+                return new Response<UpdaeteCategoryVM>(null, "Category not found", false);
+            }
+            catch (Exception ex)
+            {
+                return new Response<UpdaeteCategoryVM>(null, ex.Message, false);
             }
         }
     }

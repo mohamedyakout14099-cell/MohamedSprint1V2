@@ -8,6 +8,7 @@
     var pagedResult = Model?.result;
     var categories = pagedResult?.Items ?? new List<GetallCategoryVM>();
     string? searchTerm = ViewBag.SearchTerm;
+    bool showDeleted = (bool)(ViewBag.ShowDeleted ?? false);
 }
 
 <div class="admin-card">
@@ -30,19 +31,40 @@
     <div class="row g-3 mb-4">
         <div class="col-12 col-md-6">
             <form asp-area="Admin" asp-controller="Category" asp-action="Index" method="get">
+                <input type="hidden" name="showDeleted" value="@showDeleted" />
                 <div class="input-group">
                     <span class="input-group-text bg-dark border-secondary text-muted">
                         <i class="fa-solid fa-magnifying-glass"></i>
                     </span>
-                    <input type="text" name="search" value="@searchTerm" class="form-control admin-form-control" 
+                    <input type="text" name="search" value="@searchTerm" class="form-control admin-form-control"
                            placeholder="Search category name or description..." />
                     <button type="submit" class="btn btn-outline-secondary">Search</button>
                     @if (!string.IsNullOrEmpty(searchTerm))
                     {
-                        <a asp-area="Admin" asp-controller="Category" asp-action="Index" class="btn btn-outline-danger">Clear</a>
+                        <a asp-area="Admin" asp-controller="Category" asp-action="Index"
+                           asp-route-showDeleted="@showDeleted" class="btn btn-outline-danger">Clear</a>
                     }
                 </div>
             </form>
+        </div>
+        <div class="col-12 col-md-6 d-flex justify-content-end align-items-center gap-2">
+            @if (showDeleted)
+            {
+                <a asp-area="Admin" asp-controller="Category" asp-action="Index"
+                   asp-route-showDeleted="false" class="btn btn-sm btn-outline-success">
+                    <i class="fa-solid fa-eye"></i> Show Active Only
+                </a>
+                <span class="badge bg-danger-subtle text-danger px-3 py-2 rounded-pill">
+                    <i class="fa-solid fa-trash-can me-1"></i> Viewing Deleted Categories
+                </span>
+            }
+            else
+            {
+                <a asp-area="Admin" asp-controller="Category" asp-action="Index"
+                   asp-route-showDeleted="true" class="btn btn-sm btn-outline-warning">
+                    <i class="fa-solid fa-trash-can"></i> Show Deleted
+                </a>
+            }
         </div>
     </div>
 
@@ -55,33 +77,64 @@
                         <th style="width: 80px;">#ID</th>
                         <th>Category Name</th>
                         <th>Description</th>
-                        <th class="text-end" style="width: 160px;">Actions</th>
+                        <th>Status</th>
+                        <th class="text-end" style="width: 180px;">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach (var cat in categories)
                     {
-                        <tr>
+                        <tr style="@(cat.IsDeleted ? "opacity:0.75; background:rgba(220,53,69,0.07);" : "")">
                             <td>
                                 <span class="badge bg-secondary rounded-pill px-3 py-2">#@cat.id</span>
                             </td>
                             <td>
-                                <div class="fw-bold text-white fs-6">@cat.name</div>
+                                <div class="fw-bold fs-6 @(cat.IsDeleted ? "text-danger text-decoration-line-through" : "text-white")">
+                                    @cat.name
+                                </div>
                             </td>
                             <td>
                                 <span class="text-muted">@(string.IsNullOrEmpty(cat.description) ? "—" : cat.description)</span>
                             </td>
+                            <td>
+                                @if (cat.IsDeleted)
+                                {
+                                    <span class="badge bg-danger rounded-pill px-3 py-2">
+                                        <i class="fa-solid fa-ban me-1"></i> Deleted
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-success rounded-pill px-3 py-2">
+                                        <i class="fa-solid fa-circle-check me-1"></i> Active
+                                    </span>
+                                }
+                            </td>
                             <td class="text-end">
-                                <div class="btn-group">
-                                    <a asp-area="Admin" asp-controller="Category" asp-action="Edit" asp-route-id="@cat.id" 
-                                       class="btn btn-sm btn-outline-primary rounded-start-3" title="Edit Category">
-                                        <i class="fa-solid fa-pen-to-square"></i> Edit
-                                    </a>
-                                    <a asp-area="Admin" asp-controller="Category" asp-action="Delete" asp-route-id="@cat.id" 
-                                       class="btn btn-sm btn-outline-danger rounded-end-3" title="Delete Category">
-                                        <i class="fa-solid fa-trash-can"></i> Delete
-                                    </a>
-                                </div>
+                                @if (cat.IsDeleted)
+                                {
+                                    <form asp-area="Admin" asp-controller="Category" asp-action="Restore"
+                                          asp-route-id="@cat.id" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-outline-success rounded-3"
+                                                onclick="return confirm('Are you sure you want to restore this category?')">
+                                            <i class="fa-solid fa-rotate-left"></i> Restore
+                                        </button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <div class="btn-group">
+                                        <a asp-area="Admin" asp-controller="Category" asp-action="Edit" asp-route-id="@cat.id"
+                                           class="btn btn-sm btn-outline-primary rounded-start-3" title="Edit Category">
+                                            <i class="fa-solid fa-pen-to-square"></i> Edit
+                                        </a>
+                                        <a asp-area="Admin" asp-controller="Category" asp-action="Delete" asp-route-id="@cat.id"
+                                           class="btn btn-sm btn-outline-danger rounded-end-3" title="Delete Category">
+                                            <i class="fa-solid fa-trash-can"></i> Delete
+                                        </a>
+                                    </div>
+                                }
                             </td>
                         </tr>
                     }
@@ -94,13 +147,25 @@
     else
     {
         <div class="text-center py-5 text-muted">
-            <i class="fa-solid fa-layer-group fa-3x mb-3 opacity-50"></i>
-            <h5>No categories created yet</h5>
-            <p>Add departments or categories to organize store products.</p>
-            <a asp-area="Admin" asp-controller="Category" asp-action="Create" class="btn-admin-primary mt-2">
-                <i class="fa-solid fa-plus"></i> Add Category
-            </a>
+            @if (showDeleted)
+            {
+                <i class="fa-solid fa-trash-can fa-3x mb-3 opacity-50"></i>
+                <h5>No deleted categories found</h5>
+                <p>All categories are currently active.</p>
+                <a asp-area="Admin" asp-controller="Category" asp-action="Index"
+                   asp-route-showDeleted="false" class="btn-admin-primary mt-2">
+                    <i class="fa-solid fa-arrow-left"></i> Back to Active Categories
+                </a>
+            }
+            else
+            {
+                <i class="fa-solid fa-layer-group fa-3x mb-3 opacity-50"></i>
+                <h5>No categories created yet</h5>
+                <p>Add departments or categories to organize store products.</p>
+                <a asp-area="Admin" asp-controller="Category" asp-action="Create" class="btn-admin-primary mt-2">
+                    <i class="fa-solid fa-plus"></i> Add Category
+                </a>
+            }
         </div>
     }
 </div>
-

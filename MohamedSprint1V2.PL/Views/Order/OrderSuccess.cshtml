@@ -1,0 +1,136 @@
+@using MohamedSprint1V2.DLL.ModelVM.Order
+@model OrderDetailsVM
+
+@{
+    ViewData["Title"] = "Order Confirmed - Thank You!";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Success Card Banner -->
+            <div class="card border-0 shadow-sm rounded-4 text-center p-4 p-md-5 mb-4 bg-white">
+                <div class="mb-3">
+                    <span class="rounded-circle bg-success text-white d-inline-flex align-items-center justify-content-center" 
+                          style="width: 80px; height: 80px; font-size: 2.5rem; box-shadow: 0 0 25px rgba(25, 135, 84, 0.4);">
+                        <i class="fa-solid fa-check"></i>
+                    </span>
+                </div>
+                <h2 class="fw-bold text-dark mb-2">Thank You For Your Order!</h2>
+                <p class="text-muted mb-4 lead">
+                    Your order has been placed successfully and is now being processed.
+                </p>
+
+                <div class="row g-3 justify-content-center text-start mb-2">
+                    <div class="col-sm-6 col-md-3">
+                        <div class="p-3 bg-light rounded-3 text-center border">
+                            <span class="text-muted small d-block">Order Number</span>
+                            <strong class="text-primary fs-5">#@Model.OrderId</strong>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-md-3">
+                        <div class="p-3 bg-light rounded-3 text-center border">
+                            <span class="text-muted small d-block">Order Date</span>
+                            <strong class="text-dark">@Model.OrderDate.ToString("MMM dd, yyyy")</strong>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-md-3">
+                        <div class="p-3 bg-light rounded-3 text-center border">
+                            <span class="text-muted small d-block">Total Amount</span>
+                            <strong class="text-success fs-5">$@Model.TotalPrice.ToString("N2")</strong>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-md-3">
+                        <div class="p-3 bg-light rounded-3 text-center border">
+                            <span class="text-muted small d-block">Payment Method</span>
+                            <strong class="text-dark small">@Model.PaymentMethod</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Details Card -->
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-header bg-white border-bottom py-3 px-4">
+                    <h5 class="fw-bold text-dark mb-0">
+                        <i class="fa-solid fa-box-open text-primary me-2"></i>Ordered Items
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-4">Product</th>
+                                    <th class="text-center">Price</th>
+                                    <th class="text-center">Qty</th>
+                                    <th class="pe-4 text-end">Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.Items)
+                                {
+                                    <tr>
+                                        <td class="ps-4 py-3">
+                                            <div class="d-flex align-items-center gap-3">
+                                                <img src="@(string.IsNullOrEmpty(item.ProductImg) ? "https://placehold.co/50x50?text=IMG" : item.ProductImg)" 
+                                                     alt="@item.ProductName" width="50" height="50" class="rounded-3 object-fit-cover border" />
+                                                <span class="fw-semibold text-dark">@item.ProductName</span>
+                                            </div>
+                                        </td>
+                                        <td class="text-center">$@item.Price.ToString("N2")</td>
+                                        <td class="text-center">
+                                            <span class="badge bg-light text-dark border px-3 py-2">@item.Quantity</span>
+                                        </td>
+                                        <td class="pe-4 text-end fw-bold text-dark">$@item.SubTotal.ToString("N2")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                            <tfoot class="table-light">
+                                <tr>
+                                    <td colspan="3" class="ps-4 fw-bold text-dark">Total:</td>
+                                    <td class="pe-4 text-end fw-bold fs-5 text-primary">$@Model.TotalPrice.ToString("N2")</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Shipping Info Card -->
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-header bg-white border-bottom py-3 px-4">
+                    <h5 class="fw-bold text-dark mb-0">
+                        <i class="fa-solid fa-location-dot text-danger me-2"></i>Delivery Destination
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <span class="text-muted small d-block">Recipient Name</span>
+                            <span class="fw-bold text-dark">@Model.Name</span>
+                        </div>
+                        <div class="col-md-6">
+                            <span class="text-muted small d-block">Contact Phone</span>
+                            <span class="fw-semibold text-dark">@Model.PhoneNumber</span>
+                        </div>
+                        <div class="col-12">
+                            <span class="text-muted small d-block">Shipping Address</span>
+                            <span class="text-dark">@Model.Address, @Model.City</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="d-flex flex-wrap gap-3 justify-content-center">
+                <a asp-controller="Order" asp-action="MyOrders" class="btn btn-primary rounded-pill px-4 py-2">
+                    <i class="fa-solid fa-clock-rotate-left me-2"></i>View My Orders
+                </a>
+                <a asp-controller="Store" asp-action="Index" class="btn btn-outline-secondary rounded-pill px-4 py-2">
+                    <i class="fa-solid fa-store me-2"></i>Continue Shopping
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

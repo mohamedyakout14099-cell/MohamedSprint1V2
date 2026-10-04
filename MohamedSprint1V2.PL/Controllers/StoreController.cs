@@ -2,7 +2,10 @@ using Microsoft.AspNetCore.Mvc;
 using MohamedSprint1V2.DLL.ModelVM.Category;
 using MohamedSprint1V2.DLL.ModelVM.Product;
 using MohamedSprint1V2.DLL.ModelVM.Pagination;
+using MohamedSprint1V2.DLL.ModelVM.Review;
 using MohamedSprint1V2.DLL.Service.Abstraction;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace MohamedSprint1V2.PL.Controllers
 {
@@ -10,11 +13,16 @@ namespace MohamedSprint1V2.PL.Controllers
     {
         private readonly IProductService _productService;
         private readonly ICategoryService _categoryService;
+        private readonly IReviewService _reviewService;
 
-        public StoreController(IProductService productService, ICategoryService categoryService)
+        public StoreController(
+            IProductService productService, 
+            ICategoryService categoryService,
+            IReviewService reviewService)
         {
             _productService = productService;
             _categoryService = categoryService;
+            _reviewService = reviewService;
         }
 
         public IActionResult Index(int? categoryId, string? search, string? sort, int pageNumber = 1, int pageSize = 8)
@@ -58,7 +66,7 @@ namespace MohamedSprint1V2.PL.Controllers
             return View(pagedProducts);
         }
 
-        public IActionResult Details(int id)
+        public async Task<IActionResult> Details(int id)
         {
             var productResponse = _productService.GetProductById(id);
             if (productResponse == null || !productResponse.Successornot || productResponse.result == null)
@@ -77,6 +85,11 @@ namespace MohamedSprint1V2.PL.Controllers
                 .Take(4)
                 .ToList();
             ViewBag.RelatedProducts = related;
+
+            // Load Reviews Summary
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var reviewsResponse = await _reviewService.GetProductReviewsAsync(id, currentUserId);
+            ViewBag.ReviewsSummary = reviewsResponse?.result ?? new ProductReviewsSummaryVM { ProductId = id };
 
             return View(productResponse.result);
         }

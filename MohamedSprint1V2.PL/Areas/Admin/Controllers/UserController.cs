@@ -21,7 +21,8 @@ namespace MohamedSprint1V2.PL.Areas.Admin.Controllers
         [HttpGet]
         public async Task<IActionResult> Index(string? search, int pageNumber = 1, int pageSize = 10)
         {
-            var usersResponse = await _authService.GetAllUSers();
+            // جلب الكل بما فيهم المحذوفين حتى يتمكن الأدمن من استعادتهم
+            var usersResponse = await _authService.GetAllUsersIncludingDeleted();
             var list = usersResponse?.result?.ToList() ?? new List<AllUserVM>();
 
             if (!string.IsNullOrWhiteSpace(search))

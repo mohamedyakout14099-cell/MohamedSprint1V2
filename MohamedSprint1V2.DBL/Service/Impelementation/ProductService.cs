@@ -1,4 +1,4 @@
-﻿using MohamedSprint1V2.DAL.Entity;
+using MohamedSprint1V2.DAL.Entity;
 namespace MohamedSprint1V2.DLL.Service.Impelementation
 {
     public class ProductService : IProductService
@@ -140,6 +140,98 @@ namespace MohamedSprint1V2.DLL.Service.Impelementation
             catch(Exception ex)
             {
                 return new Response<bool>(false, $"An error occurred: {ex.Message}", false);
+            }
+        }
+        public Response<bool> SoftDeleteProduct(int id)
+        {
+            try
+            {
+                var success = unitOfWork.Product.SoftDelete(id);
+                if (!success)
+                    return new Response<bool>(false, "Product not found", false);
+
+                var result = unitOfWork.Save();
+                if (result > 0)
+                    return new Response<bool>(true, "Product soft-deleted successfully", true);
+
+                return new Response<bool>(false, "Failed to soft-delete product", false);
+            }
+            catch (Exception ex)
+            {
+                return new Response<bool>(false, $"An error occurred: {ex.Message}", false);
+            }
+        }
+
+        public Response<bool> RestoreProduct(int id)
+        {
+            try
+            {
+                var success = unitOfWork.Product.Restore(id);
+                if (!success)
+                    return new Response<bool>(false, "Product not found", false);
+
+                var result = unitOfWork.Save();
+                if (result > 0)
+                    return new Response<bool>(true, "Product restored successfully", true);
+
+                return new Response<bool>(false, "Failed to restore product", false);
+            }
+            catch (Exception ex)
+            {
+                return new Response<bool>(false, $"An error occurred: {ex.Message}", false);
+            }
+        }
+
+        public Response<List<GetAllProductVM>> GetAllProductsIncludingDeleted()
+        {
+            try
+            {
+                var result = unitOfWork.Product.GetAllIncludingDeleted();
+                if (result == null || result.Count == 0)
+                    return new Response<List<GetAllProductVM>>(null, "No Products Found", false);
+
+                var mapp = result.Select(item => new GetAllProductVM()
+                {
+                    id = item.Id,
+                    name = item.Name,
+                    description = item.Description,
+                    img = item.Img,
+                    price = item.Price,
+                    categoryId = item.CategoryId,
+                    isDeleted = item.IsDeleted
+                }).ToList();
+
+                return new Response<List<GetAllProductVM>>(mapp, "Products retrieved successfully", true);
+            }
+            catch (Exception ex)
+            {
+                return new Response<List<GetAllProductVM>>(null, $"An error occurred: {ex.Message}", false);
+            }
+        }
+
+        public Response<UpdateProductVM> GetProductByIdIncludingDeleted(int id)
+        {
+            try
+            {
+                var product = unitOfWork.Product.GetByIdIgnoreFilter(id);
+                if (product != null)
+                {
+                    var productVM = new UpdateProductVM
+                    {
+                        Id = product.Id,
+                        Name = product.Name,
+                        Description = product.Description,
+                        Img = product.Img,
+                        Price = product.Price,
+                        CategoryId = product.CategoryId
+                    };
+                    return new Response<UpdateProductVM>(productVM, "Product retrieved successfully", true);
+                }
+                return new Response<UpdateProductVM>(null, "Product not found", false);
+            }
+            catch (Exception ex)
+            {
+                return new Response<UpdateProductVM>(null, $"An error occurred: {ex.Message}", false);
             }
         }
     }

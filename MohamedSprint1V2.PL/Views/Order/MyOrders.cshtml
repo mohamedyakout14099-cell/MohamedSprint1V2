@@ -1,0 +1,114 @@
+@using MohamedSprint1V2.DLL.ModelVM.Order
+@model List<OrderListVM>
+
+@{
+    ViewData["Title"] = "My Orders";
+}
+
+<div class="container py-4">
+    <!-- Header -->
+    <div class="row align-items-center mb-4">
+        <div class="col">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index" class="text-decoration-none">Home</a></li>
+                    <li class="breadcrumb-item active">My Orders</li>
+                </ol>
+            </nav>
+            <h2 class="fw-bold text-dark mb-0">
+                <i class="fa-solid fa-clock-rotate-left me-2 text-primary"></i>My Order History
+            </h2>
+            <span class="text-muted small">Track and view your recent purchases</span>
+        </div>
+        <div class="col-auto">
+            <a asp-controller="Store" asp-action="Index" class="btn btn-outline-primary rounded-pill px-4">
+                <i class="fa-solid fa-store me-2"></i>Continue Shopping
+            </a>
+        </div>
+    </div>
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="text-center py-5 bg-white rounded-4 border shadow-sm my-4">
+            <i class="fa-solid fa-box-open fa-4x text-muted mb-3 opacity-40"></i>
+            <h4 class="fw-bold text-dark">No orders yet</h4>
+            <p class="text-muted">You haven't placed any orders yet. Discover our latest products!</p>
+            <a asp-controller="Store" asp-action="Index" class="btn btn-primary rounded-pill px-5 mt-2">
+                <i class="fa-solid fa-bag-shopping me-2"></i>Start Shopping
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-4 py-3">Order ID</th>
+                                <th class="py-3">Date</th>
+                                <th class="py-3">Items</th>
+                                <th class="py-3">Total Amount</th>
+                                <th class="py-3">Status</th>
+                                <th class="pe-4 py-3 text-end">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var order in Model)
+                            {
+                                <tr>
+                                    <td class="ps-4 py-3">
+                                        <span class="fw-bold text-primary">#@order.OrderId</span>
+                                    </td>
+                                    <td>
+                                        <span class="text-dark">@order.OrderDate.ToString("MMM dd, yyyy")</span>
+                                        <small class="text-muted d-block">@order.OrderDate.ToString("hh:mm tt")</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-light text-dark border px-3 py-1">@order.ItemCount item(s)</span>
+                                    </td>
+                                    <td>
+                                        <span class="fw-bold text-dark">$@order.TotalPrice.ToString("N2")</span>
+                                    </td>
+                                    <td>
+                                        @if (order.OrderStatus == "Approved" || order.OrderStatus == "Delivered")
+                                        {
+                                            <span class="badge bg-success-subtle text-success px-3 py-1 rounded-pill fw-semibold">
+                                                <i class="fa-solid fa-circle-check me-1"></i>@order.OrderStatus
+                                            </span>
+                                        }
+                                        else if (order.OrderStatus == "Processing" || order.OrderStatus == "Shipped")
+                                        {
+                                            <span class="badge bg-primary-subtle text-primary px-3 py-1 rounded-pill fw-semibold">
+                                                <i class="fa-solid fa-truck-fast me-1"></i>@order.OrderStatus
+                                            </span>
+                                        }
+                                        else if (order.OrderStatus == "Cancelled")
+                                        {
+                                            <span class="badge bg-danger-subtle text-danger px-3 py-1 rounded-pill fw-semibold">
+                                                <i class="fa-solid fa-circle-xmark me-1"></i>@order.OrderStatus
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-warning-subtle text-warning px-3 py-1 rounded-pill fw-semibold">
+                                                <i class="fa-solid fa-hourglass-half me-1"></i>@order.OrderStatus
+                                            </span>
+                                        }
+                                    </td>
+                                    <td class="pe-4 text-end">
+                                        <a asp-controller="Order" asp-action="Details" asp-route-id="@order.OrderId" 
+                                           class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                            <i class="fa-solid fa-file-invoice me-1"></i>Details
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+</div>

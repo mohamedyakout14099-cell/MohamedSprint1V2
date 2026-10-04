@@ -1,4 +1,4 @@
-﻿namespace MohamedSprint1V2.DLL.ModelVM.Category
+namespace MohamedSprint1V2.DLL.ModelVM.Category
 {
     public class GetallCategoryVM
     {
@@ -6,5 +6,6 @@
         public string name { get; set; }
         public string description { get; set; }
         public DateTime CreatedTime { get; set; }
+        public bool IsDeleted { get; set; }
     }
 }

@@ -8,6 +8,7 @@
     var pagedResult = Model?.result;
     var productsList = pagedResult?.Items ?? new List<GetAllProductVM>();
     string? searchTerm = ViewBag.SearchTerm;
+    bool showDeleted = (bool)(ViewBag.ShowDeleted ?? false);
 }
 
 <div class="admin-card">
@@ -30,19 +31,40 @@
     <div class="row g-3 mb-4">
         <div class="col-12 col-md-6">
             <form asp-area="Admin" asp-controller="Product" asp-action="Index" method="get">
+                <input type="hidden" name="showDeleted" value="@showDeleted" />
                 <div class="input-group">
                     <span class="input-group-text bg-dark border-secondary text-muted">
                         <i class="fa-solid fa-magnifying-glass"></i>
                     </span>
-                    <input type="text" name="search" value="@searchTerm" class="form-control admin-form-control" 
+                    <input type="text" name="search" value="@searchTerm" class="form-control admin-form-control"
                            placeholder="Search products by name or description..." />
                     <button type="submit" class="btn btn-outline-secondary">Search</button>
                     @if (!string.IsNullOrEmpty(searchTerm))
                     {
-                        <a asp-area="Admin" asp-controller="Product" asp-action="Index" class="btn btn-outline-danger">Clear</a>
+                        <a asp-area="Admin" asp-controller="Product" asp-action="Index"
+                           asp-route-showDeleted="@showDeleted" class="btn btn-outline-danger">Clear</a>
                     }
                 </div>
             </form>
+        </div>
+        <div class="col-12 col-md-6 d-flex justify-content-end align-items-center gap-2">
+            @if (showDeleted)
+            {
+                <a asp-area="Admin" asp-controller="Product" asp-action="Index"
+                   asp-route-showDeleted="false" class="btn btn-sm btn-outline-success">
+                    <i class="fa-solid fa-eye"></i> Show Active Only
+                </a>
+                <span class="badge bg-danger-subtle text-danger px-3 py-2 rounded-pill">
+                    <i class="fa-solid fa-trash-can me-1"></i> Viewing Deleted Products
+                </span>
+            }
+            else
+            {
+                <a asp-area="Admin" asp-controller="Product" asp-action="Index"
+                   asp-route-showDeleted="true" class="btn btn-sm btn-outline-warning">
+                    <i class="fa-solid fa-trash-can"></i> Show Deleted
+                </a>
+            }
         </div>
     </div>
 
@@ -56,26 +78,29 @@
                         <th>Product Details</th>
                         <th>Price</th>
                         <th>Category ID</th>
-                        <th class="text-end" style="width: 160px;">Actions</th>
+                        <th>Status</th>
+                        <th class="text-end" style="width: 180px;">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach (var item in productsList)
                     {
-                        <tr class="product-row">
+                        <tr class="product-row" style="@(item.isDeleted ? "opacity:0.75; background:rgba(220,53,69,0.07);" : "")">
                             <td>
-                                <img src="@(string.IsNullOrEmpty(item.img) ? "https://placehold.co/80x80?text=Product" : item.img)" 
-                                     alt="@item.name" 
-                                     style="width: 58px; height: 58px; object-fit: cover; border-radius: 10px; border: 1px solid var(--admin-border);" />
+                                <img src="@(string.IsNullOrEmpty(item.img) ? "https://placehold.co/80x80?text=Product" : item.img)"
+                                     alt="@item.name"
+                                     style="width:58px;height:58px;object-fit:cover;border-radius:10px;border:1px solid var(--admin-border);@(item.isDeleted ? "filter:grayscale(80%);" : "")" />
                             </td>
                             <td>
-                                <div class="fw-bold text-white fs-6">@item.name</div>
-                                <div class="text-muted small text-truncate" style="max-width: 380px;">
+                                <div class="fw-bold fs-6 @(item.isDeleted ? "text-danger text-decoration-line-through" : "text-white")">
+                                    @item.name
+                                </div>
+                                <div class="text-muted small text-truncate" style="max-width:380px;">
                                     @(string.IsNullOrEmpty(item.description) ? "No description provided." : item.description)
                                 </div>
                             </td>
                             <td>
-                                <span class="badge bg-success-subtle text-success fs-6 fw-bold px-3 py-2 rounded-pill">
+                                <span class="badge @(item.isDeleted ? "bg-secondary" : "bg-success-subtle text-success") fs-6 fw-bold px-3 py-2 rounded-pill">
                                     $@item.price.ToString("N2")
                                 </span>
                             </td>
@@ -84,17 +109,45 @@
                                     Cat #@item.categoryId
                                 </span>
                             </td>
+                            <td>
+                                @if (item.isDeleted)
+                                {
+                                    <span class="badge bg-danger rounded-pill px-3 py-2">
+                                        <i class="fa-solid fa-ban me-1"></i> Deleted
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-success rounded-pill px-3 py-2">
+                                        <i class="fa-solid fa-circle-check me-1"></i> Active
+                                    </span>
+                                }
+                            </td>
                             <td class="text-end">
-                                <div class="btn-group">
-                                    <a asp-area="Admin" asp-controller="Product" asp-action="Edit" asp-route-id="@item.id" 
-                                       class="btn btn-sm btn-outline-primary rounded-start-3" title="Edit Product">
-                                        <i class="fa-solid fa-pen-to-square"></i> Edit
-                                    </a>
-                                    <a asp-area="Admin" asp-controller="Product" asp-action="Delete" asp-route-id="@item.id" 
-                                       class="btn btn-sm btn-outline-danger rounded-end-3" title="Delete Product">
-                                        <i class="fa-solid fa-trash-can"></i> Delete
-                                    </a>
-                                </div>
+                                @if (item.isDeleted)
+                                {
+                                    <form asp-area="Admin" asp-controller="Product" asp-action="Restore"
+                                          asp-route-id="@item.id" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-outline-success rounded-3"
+                                                onclick="return confirm('Are you sure you want to restore this product?')">
+                                            <i class="fa-solid fa-rotate-left"></i> Restore
+                                        </button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <div class="btn-group">
+                                        <a asp-area="Admin" asp-controller="Product" asp-action="Edit" asp-route-id="@item.id"
+                                           class="btn btn-sm btn-outline-primary rounded-start-3" title="Edit Product">
+                                            <i class="fa-solid fa-pen-to-square"></i> Edit
+                                        </a>
+                                        <a asp-area="Admin" asp-controller="Product" asp-action="Delete" asp-route-id="@item.id"
+                                           class="btn btn-sm btn-outline-danger rounded-end-3" title="Delete Product">
+                                            <i class="fa-solid fa-trash-can"></i> Delete
+                                        </a>
+                                    </div>
+                                }
                             </td>
                         </tr>
                     }
@@ -107,13 +160,25 @@
     else
     {
         <div class="text-center py-5 text-muted">
-            <i class="fa-solid fa-boxes-packing fa-3x mb-3 opacity-50"></i>
-            <h5>No products available</h5>
-            <p>Start by creating your first product item.</p>
-            <a asp-area="Admin" asp-controller="Product" asp-action="Create" class="btn-admin-primary mt-2">
-                <i class="fa-solid fa-plus"></i> Create Product
-            </a>
+            @if (showDeleted)
+            {
+                <i class="fa-solid fa-trash-can fa-3x mb-3 opacity-50"></i>
+                <h5>No deleted products found</h5>
+                <p>All products are currently active.</p>
+                <a asp-area="Admin" asp-controller="Product" asp-action="Index"
+                   asp-route-showDeleted="false" class="btn-admin-primary mt-2">
+                    <i class="fa-solid fa-arrow-left"></i> Back to Active Products
+                </a>
+            }
+            else
+            {
+                <i class="fa-solid fa-boxes-packing fa-3x mb-3 opacity-50"></i>
+                <h5>No products available</h5>
+                <p>Start by creating your first product item.</p>
+                <a asp-area="Admin" asp-controller="Product" asp-action="Create" class="btn-admin-primary mt-2">
+                    <i class="fa-solid fa-plus"></i> Create Product
+                </a>
+            }
         </div>
     }
 </div>
-

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -12,5 +12,6 @@ namespace MohamedSprint1V2.DLL.ModelVM.Product
         public string img { get; set; }
         public decimal price { get; set; }
         public int categoryId { get; set; }
+        public bool isDeleted { get; set; }
     }
 }

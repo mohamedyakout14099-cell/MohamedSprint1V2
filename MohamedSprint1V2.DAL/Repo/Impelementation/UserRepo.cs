@@ -9,17 +9,28 @@ namespace MohamedSprint1V2.DAL.Repo.Impelementation
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly MohamedSprint1V2DbContext _context;
+
         public UserRepo(UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
-            RoleManager<IdentityRole> roleManager)
+            RoleManager<IdentityRole> roleManager,
+            MohamedSprint1V2DbContext context)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _roleManager = roleManager;
+            _context = context;
         }
         public async Task<IEnumerable<ApplicationUser>> GetAllUsersAsync()
         {
             return await _userManager.Users.ToListAsync();
+        }
+
+        public async Task<IEnumerable<ApplicationUser>> GetAllUsersIncludingDeletedAsync()
+        {
+            return await _context.Users
+                .IgnoreQueryFilters()
+                .ToListAsync();
         }
 
         public async Task<bool> LoginUserAsync(
@@ -76,27 +87,29 @@ namespace MohamedSprint1V2.DAL.Repo.Impelementation
 
         public async Task<bool> SoftDeleteUserAsync(string userId)
         {
-            var user = await _userManager.FindByIdAsync(userId);
+            var user = await _context.Users.IgnoreQueryFilters().FirstOrDefaultAsync(u => u.Id == userId);
             if (user == null) return false;
 
+            if (user.IsDeleted) return true;
             user.IsDeleted = true;
-            var result = await _userManager.UpdateAsync(user);
-            return result.Succeeded;
+            await _context.SaveChangesAsync();
+            return true;
         }
 
         public async Task<bool> RestoreUserAsync(string userId)
         {
-            var user = await _userManager.FindByIdAsync(userId);
+            var user = await _context.Users.IgnoreQueryFilters().FirstOrDefaultAsync(u => u.Id == userId);
             if (user == null) return false;
 
+            if (!user.IsDeleted) return true;
             user.IsDeleted = false;
-            var result = await _userManager.UpdateAsync(user);
-            return result.Succeeded;
+            await _context.SaveChangesAsync();
+            return true;
         }
 
         public async Task<bool> MakeAdminAsync(string userId)
         {
-            var user = await _userManager.FindByIdAsync(userId);
+            var user = await _context.Users.IgnoreQueryFilters().FirstOrDefaultAsync(u => u.Id == userId);
             if (user == null) return false;
 
             if (!await _roleManager.RoleExistsAsync("Admin"))

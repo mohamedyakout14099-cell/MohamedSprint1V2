@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Identity;
 
 namespace MohamedSprint1V2.DAL.Entity
@@ -20,7 +19,6 @@ namespace MohamedSprint1V2.DAL.Entity
         }
 
         public List<byte> Img { get; set; } 
-        [Required]
         public string Name { get; set; } 
 
         public string? Address { get; set; }
