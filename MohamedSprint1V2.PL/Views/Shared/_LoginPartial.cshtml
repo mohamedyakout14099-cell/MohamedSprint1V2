@@ -25,6 +25,10 @@
                         @(User.IsInRole("Manager") ? "General Manager" : User.IsInRole("Admin") ? "Administrator" : "Valued Customer")
                     </small>
                 </div>
+            <li>
+                <a class="dropdown-item text-dark fw-semibold" asp-area="" asp-controller="Order" asp-action="MyOrders">
+                    <i class="fa-solid fa-clock-rotate-left me-2 text-primary"></i> My Orders
+                </a>
             </li>
             <li><hr class="dropdown-divider"></li>
             @if (User.IsInRole("Admin") || User.IsInRole("Manager"))

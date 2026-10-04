@@ -2,17 +2,17 @@ namespace MohamedSprint1V2.DAL.Entity
 {
     public class OrderDetail
     {
-        protected OrderDetail() { }
-        public int Id { get; private set; }
+        public OrderDetail() { }
+        public int Id { get; set; }
 
-        public int OrderHeaderId { get; private set; }
-        public OrderHeader OrderHeader { get; private set; }
+        public int OrderHeaderId { get; set; }
+        public OrderHeader? OrderHeader { get; set; }
 
-        public int ProductId { get; private set; }
-        public Product Product { get; private set; }
+        public int ProductId { get; set; }
+        public Product? Product { get; set; }
 
-        public decimal Price { get; private set; }
+        public decimal Price { get; set; }
 
-        public int Count { get; private set; }
+        public int Count { get; set; }
     }
 }

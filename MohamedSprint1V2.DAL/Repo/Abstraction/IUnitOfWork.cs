@@ -10,6 +10,8 @@ namespace MohamedSprint1V2.DAL.Repo.Abstraction
         IProductRepo Product { get; }
         ICartRepo Cart { get; }
         ICartItemRepo CartItem { get; }
+        IOrderHeaderRepo OrderHeader { get; }
+        IOrderDetailRepo OrderDetail { get; }
         int Save();
         void Dispose();
     }

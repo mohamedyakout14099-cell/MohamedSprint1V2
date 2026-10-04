@@ -13,7 +13,7 @@ namespace MohamedSprint1V2.DAL.Database.Configurations
                 .HasColumnType("decimal(18,2)");
 
             builder.HasOne(od => od.OrderHeader)
-                .WithMany()
+                .WithMany(oh => oh.OrderDetails)
                 .HasForeignKey(od => od.OrderHeaderId);
 
             builder.HasOne(od => od.Product)

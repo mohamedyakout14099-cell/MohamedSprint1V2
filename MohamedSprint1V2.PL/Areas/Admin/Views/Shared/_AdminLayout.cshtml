@@ -477,6 +477,13 @@
                 <span>Dashboard</span>
             </a>
 
+            <div class="nav-section-title">Sales & Orders</div>
+            <a asp-area="Admin" asp-controller="Order" asp-action="Index" 
+               class="admin-nav-item @(currentController == "Order" ? "active" : "")">
+                <i class="fa-solid fa-cart-flatbed-suitcase"></i>
+                <span>Orders</span>
+            </a>
+
             <div class="nav-section-title">Catalog Management</div>
             <a asp-area="Admin" asp-controller="Product" asp-action="Index" 
                class="admin-nav-item @(currentController == "Product" ? "active" : "")">
