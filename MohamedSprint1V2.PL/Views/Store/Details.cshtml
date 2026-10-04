@@ -1,10 +1,14 @@
 @using MohamedSprint1V2.DLL.ModelVM.Product
+@using MohamedSprint1V2.DLL.ModelVM.Review
 @model UpdateProductVM
 
 @{
     ViewData["Title"] = Model.Name + " - Details";
     var categoryName = ViewBag.CategoryName as string ?? "General";
     var relatedProducts = ViewBag.RelatedProducts as List<GetAllProductVM> ?? new List<GetAllProductVM>();
+    var reviewsSummary = ViewBag.ReviewsSummary as ProductReviewsSummaryVM ?? new ProductReviewsSummaryVM { ProductId = Model.Id };
+    var successMessage = TempData["SuccessMessage"] as string;
+    var errorMessage = TempData["ErrorMessage"] as string;
 }
 
 <style>
@@ -49,9 +53,97 @@
         margin-bottom: 10px;
         border: 1px solid var(--border-color);
     }
+
+    /* Review & Star Styles */
+    .star-rating-gold {
+        color: #f59e0b;
+    }
+
+    .star-rating-empty {
+        color: #cbd5e1;
+    }
+
+    .rating-breakdown-bar {
+        height: 8px;
+        border-radius: 999px;
+        background-color: #f1f5f9;
+        overflow: hidden;
+    }
+
+    .rating-breakdown-bar-fill {
+        height: 100%;
+        border-radius: 999px;
+        background: linear-gradient(90deg, #f59e0b, #fbbf24);
+    }
+
+    .review-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 20px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .review-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+    }
+
+    .user-avatar-circle {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #4f46e5, #06b6d4);
+        color: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1.1rem;
+    }
+
+    .star-picker {
+        display: inline-flex;
+        flex-direction: row-reverse;
+        gap: 4px;
+    }
+
+    .star-picker input {
+        display: none;
+    }
+
+    .star-picker label {
+        font-size: 1.8rem;
+        color: #cbd5e1;
+        cursor: pointer;
+        transition: color 0.15s ease, transform 0.15s ease;
+    }
+
+    .star-picker label:hover,
+    .star-picker label:hover ~ label,
+    .star-picker input:checked ~ label {
+        color: #f59e0b;
+        transform: scale(1.1);
+    }
 </style>
 
 <div class="container py-4">
+    <!-- Feedback Alerts -->
+    @if (!string.IsNullOrEmpty(successMessage))
+    {
+        <div class="alert alert-success alert-dismissible fade show rounded-4 shadow-sm mb-4" role="alert">
+            <i class="fa-solid fa-circle-check me-2"></i> @successMessage
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="alert alert-danger alert-dismissible fade show rounded-4 shadow-sm mb-4" role="alert">
+            <i class="fa-solid fa-triangle-exclamation me-2"></i> @errorMessage
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
     <!-- Breadcrumb -->
     <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb">
@@ -87,7 +179,27 @@
                     </span>
                 </div>
 
-                <h1 class="fw-bold text-dark mb-3 mt-2" style="font-size: 1.85rem;">@Model.Name</h1>
+                <h1 class="fw-bold text-dark mb-2 mt-2" style="font-size: 1.85rem;">@Model.Name</h1>
+
+                <!-- Rating Quick Header -->
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <div class="star-rating-gold">
+                        @for (int i = 1; i <= 5; i++)
+                        {
+                            if (i <= Math.Round(reviewsSummary.AverageRating))
+                            {
+                                <i class="fa-solid fa-star"></i>
+                            }
+                            else
+                            {
+                                <i class="fa-regular fa-star star-rating-empty"></i>
+                            }
+                        }
+                    </div>
+                    <span class="fw-bold text-dark">@(reviewsSummary.AverageRating > 0 ? reviewsSummary.AverageRating.ToString("0.0") : "No ratings")</span>
+                    <span class="text-muted small">(@reviewsSummary.TotalReviews @(reviewsSummary.TotalReviews == 1 ? "review" : "reviews"))</span>
+                    <a href="#reviews-section" class="text-decoration-none small ms-2 text-primary fw-semibold">Read reviews</a>
+                </div>
 
                 <div class="detail-price mb-4">
                     $@Model.Price.ToString("N2")
@@ -139,6 +251,207 @@
                 </div>
             </div>
         </div>
+    </div>
+
+    <!-- Customer Reviews Section -->
+    <div id="reviews-section" class="card border-0 rounded-4 shadow-sm p-4 p-lg-5 mb-5 bg-white">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4 pb-3 border-bottom">
+            <div>
+                <h3 class="fw-bold text-dark mb-1">Customer Reviews & Ratings</h3>
+                <p class="text-muted small mb-0">Discover authentic feedback from verified shoppers</p>
+            </div>
+            @if (User.Identity?.IsAuthenticated == true && !reviewsSummary.UserHasReviewed)
+            {
+                <a href="#write-review-form" class="btn btn-outline-primary rounded-pill px-4 fw-semibold">
+                    <i class="fa-solid fa-pen-nib me-2"></i> Write a Review
+                </a>
+            }
+        </div>
+
+        <div class="row g-4 mb-5 align-items-center">
+            <!-- Overall Score -->
+            <div class="col-12 col-md-4 text-center border-md-end">
+                <div class="display-3 fw-bold text-dark mb-1">
+                    @(reviewsSummary.AverageRating > 0 ? reviewsSummary.AverageRating.ToString("0.0") : "0.0")
+                </div>
+                <div class="star-rating-gold fs-4 mb-2">
+                    @for (int i = 1; i <= 5; i++)
+                    {
+                        if (i <= Math.Round(reviewsSummary.AverageRating))
+                        {
+                            <i class="fa-solid fa-star"></i>
+                        }
+                        else
+                        {
+                            <i class="fa-regular fa-star star-rating-empty"></i>
+                        }
+                    }
+                </div>
+                <div class="text-muted fw-semibold">
+                    Based on @reviewsSummary.TotalReviews @(reviewsSummary.TotalReviews == 1 ? "review" : "reviews")
+                </div>
+            </div>
+
+            <!-- Star Percentage Distribution -->
+            <div class="col-12 col-md-8">
+                @for (int star = 5; star >= 1; star--)
+                {
+                    var count = star switch
+                    {
+                        5 => reviewsSummary.Rating5Count,
+                        4 => reviewsSummary.Rating4Count,
+                        3 => reviewsSummary.Rating3Count,
+                        2 => reviewsSummary.Rating2Count,
+                        _ => reviewsSummary.Rating1Count
+                    };
+                    var pct = reviewsSummary.GetRatingPercentage(count);
+
+                    <div class="d-flex align-items-center gap-3 mb-2">
+                        <span class="text-dark small fw-bold" style="width: 55px;">@star Stars</span>
+                        <div class="progress flex-grow-1 rating-breakdown-bar">
+                            <div class="rating-breakdown-bar-fill" role="progressbar" style="width: @pct%;" aria-valuenow="@pct" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <span class="text-muted small text-end" style="width: 45px;">@count (@pct%)</span>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Add Review Form Section -->
+        <div id="write-review-form" class="bg-light p-4 rounded-4 mb-5 border">
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                if (reviewsSummary.UserHasReviewed)
+                {
+                    <div class="text-center py-3">
+                        <i class="fa-solid fa-circle-check text-success fs-2 mb-2"></i>
+                        <h5 class="fw-bold text-dark">You have already submitted a review for this product</h5>
+                        <p class="text-muted small mb-0">Thank you for sharing your feedback with our community!</p>
+                    </div>
+                }
+                else
+                {
+                    <h5 class="fw-bold text-dark mb-3"><i class="fa-solid fa-star me-2 text-warning"></i>Write Your Review</h5>
+                    <form asp-controller="Review" asp-action="Add" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="ProductId" value="@Model.Id" />
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-dark small">Your Overall Rating</label>
+                            <div>
+                                <div class="star-picker">
+                                    <input type="radio" id="star5" name="Rating" value="5" required />
+                                    <label for="star5" title="5 stars"><i class="fa-solid fa-star"></i></label>
+
+                                    <input type="radio" id="star4" name="Rating" value="4" />
+                                    <label for="star4" title="4 stars"><i class="fa-solid fa-star"></i></label>
+
+                                    <input type="radio" id="star3" name="Rating" value="3" />
+                                    <label for="star3" title="3 stars"><i class="fa-solid fa-star"></i></label>
+
+                                    <input type="radio" id="star2" name="Rating" value="2" />
+                                    <label for="star2" title="2 stars"><i class="fa-solid fa-star"></i></label>
+
+                                    <input type="radio" id="star1" name="Rating" value="1" />
+                                    <label for="star1" title="1 star"><i class="fa-solid fa-star"></i></label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-dark small">Your Comments</label>
+                            <textarea name="Comment" class="form-control rounded-3" rows="3" placeholder="What did you like or dislike about this product?" required minlength="3" maxlength="1000"></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold">
+                            <i class="fa-solid fa-paper-plane me-2"></i> Submit Review
+                        </button>
+                    </form>
+                }
+            }
+            else
+            {
+                <div class="text-center py-4">
+                    <i class="fa-solid fa-lock text-muted fs-3 mb-2"></i>
+                    <h5 class="fw-bold text-dark">Sign in to write a review</h5>
+                    <p class="text-muted small mb-3">Only verified members can leave feedback on products.</p>
+                    <a asp-controller="Auth" asp-action="Login" asp-route-returnUrl="@Context.Request.Path" class="btn btn-primary rounded-pill px-4 fw-semibold">
+                        <i class="fa-solid fa-arrow-right-to-bracket me-2"></i> Log In Now
+                    </a>
+                </div>
+            }
+        </div>
+
+        <!-- Reviews List -->
+        <h5 class="fw-bold text-dark mb-4">Customer Opinions (@reviewsSummary.TotalReviews)</h5>
+        @if (reviewsSummary.Reviews.Any())
+        {
+            <div class="d-flex flex-column gap-3">
+                @foreach (var rev in reviewsSummary.Reviews)
+                {
+                    <div class="review-card">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="user-avatar-circle">
+                                    @(string.IsNullOrEmpty(rev.UserName) ? "U" : rev.UserName.Substring(0, 1).ToUpper())
+                                </div>
+                                <div>
+                                    <div class="fw-bold text-dark">
+                                        @rev.UserName
+                                        @if (rev.IsCurrentCustomerReview)
+                                        {
+                                            <span class="badge bg-primary-subtle text-primary ms-1 small">You</span>
+                                        }
+                                    </div>
+                                    <small class="text-muted">
+                                        <i class="fa-regular fa-clock me-1"></i> @rev.CreatedAt.ToString("MMM dd, yyyy")
+                                    </small>
+                                </div>
+                            </div>
+
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="star-rating-gold">
+                                    @for (int i = 1; i <= 5; i++)
+                                    {
+                                        if (i <= rev.Rating)
+                                        {
+                                            <i class="fa-solid fa-star"></i>
+                                        }
+                                        else
+                                        {
+                                            <i class="fa-regular fa-star star-rating-empty"></i>
+                                        }
+                                    }
+                                </div>
+
+                                @if (rev.IsCurrentCustomerReview || User.IsInRole("Admin"))
+                                {
+                                    <form asp-controller="Review" asp-action="Delete" method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this review?');">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@rev.Id" />
+                                        <input type="hidden" name="productId" value="@Model.Id" />
+                                        <button type="submit" class="btn btn-sm btn-outline-danger border-0 rounded-circle" title="Delete Review">
+                                            <i class="fa-solid fa-trash-can"></i>
+                                        </button>
+                                    </form>
+                                }
+                            </div>
+                        </div>
+                        <p class="text-secondary mb-0 mt-3" style="line-height: 1.6;">
+                            @rev.Comment
+                        </p>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-5 border rounded-4 bg-light">
+                <i class="fa-regular fa-comments text-muted fs-1 mb-3"></i>
+                <h6 class="fw-bold text-dark">No reviews yet</h6>
+                <p class="text-muted small mb-0">Be the first to share your thoughts on this product!</p>
+            </div>
+        }
     </div>
 
     <!-- Related Products -->

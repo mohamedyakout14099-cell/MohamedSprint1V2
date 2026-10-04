@@ -17,6 +17,7 @@ namespace MohamedSprint1V2.DAL.Repo.Impelementation
             CartItem = new CartItemRepo(context);
             OrderHeader = new OrderHeaderRepo(context);
             OrderDetail = new OrderDetailRepo(context);
+            Review = new ReviewRepo(context);
         }
         public ICategoryRepo Category{ get;private set;  }
         public IProductRepo Product { get; private set; }
@@ -24,6 +25,7 @@ namespace MohamedSprint1V2.DAL.Repo.Impelementation
         public ICartItemRepo CartItem { get; private set; }
         public IOrderHeaderRepo OrderHeader { get; private set; }
         public IOrderDetailRepo OrderDetail { get; private set; }
+        public IReviewRepo Review { get; private set; }
         public int Save()
         {
             return context.SaveChanges();
