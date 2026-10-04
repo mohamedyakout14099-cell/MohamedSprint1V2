@@ -1,8 +1,12 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using MohamedSprint1V2.DAL.Entity;
+using MohamedSprint1V2.DAL.Constants;
 using MohamedSprint1V2.DLL.ModelVM.Order;
 using MohamedSprint1V2.DLL.Service.Abstraction;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace MohamedSprint1V2.PL.Areas.Admin.Controllers
 {
@@ -11,10 +15,17 @@ namespace MohamedSprint1V2.PL.Areas.Admin.Controllers
     public class OrderController : Controller
     {
         private readonly IOrderService _orderService;
+        private readonly IEmailService _emailService;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public OrderController(IOrderService orderService)
+        public OrderController(
+            IOrderService orderService,
+            IEmailService emailService,
+            UserManager<ApplicationUser> userManager)
         {
             _orderService = orderService;
+            _emailService = emailService;
+            _userManager = userManager;
         }
 
         // GET: /Admin/Order
@@ -57,12 +68,32 @@ namespace MohamedSprint1V2.PL.Areas.Admin.Controllers
         // POST: /Admin/Order/UpdateStatus
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult UpdateStatus(int orderId, string orderStatus, string? carrier, string? trackingNumber)
+        public async Task<IActionResult> UpdateStatus(int orderId, string orderStatus, string? carrier, string? trackingNumber)
         {
             var response = _orderService.UpdateOrderStatus(orderId, orderStatus, carrier, trackingNumber);
             if (response.Successornot)
             {
                 TempData["SuccessMessage"] = response.Message;
+
+                // ── Send shipping notification email when order is shipped ──────────────
+                if (orderStatus == OrderConstants.StatusShipped)
+                {
+                    var orderDetails = _orderService.GetOrderDetails(orderId);
+                    if (orderDetails.Successornot && orderDetails.result != null)
+                    {
+                        var user = await _userManager.FindByIdAsync(orderDetails.result.ApplicationUserId);
+                        if (user != null && !string.IsNullOrEmpty(user.Email))
+                        {
+                            _ = _emailService.SendOrderShippedEmailAsync(
+                                toEmail: user.Email,
+                                toName: orderDetails.result.Name,
+                                orderId: orderId,
+                                carrier: carrier,
+                                trackingNumber: trackingNumber
+                            );
+                        }
+                    }
+                }
             }
             else
             {

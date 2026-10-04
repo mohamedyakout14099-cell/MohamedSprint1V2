@@ -14,11 +14,16 @@ namespace MohamedSprint1V2.PL.Controllers
     {
         private readonly IOrderService _orderService;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IEmailService _emailService;
 
-        public OrderController(IOrderService orderService, UserManager<ApplicationUser> userManager)
+        public OrderController(
+            IOrderService orderService,
+            UserManager<ApplicationUser> userManager,
+            IEmailService emailService)
         {
             _orderService = orderService;
             _userManager = userManager;
+            _emailService = emailService;
         }
 
         private string GetUserId()
@@ -72,6 +77,20 @@ namespace MohamedSprint1V2.PL.Controllers
                     model.SubTotal = checkoutData.result.SubTotal;
                 }
                 return View(model);
+            }
+
+            // ── Send Order Confirmation Email (fire-and-forget, won't block the user) ──
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user != null && !string.IsNullOrEmpty(user.Email))
+            {
+                _ = _emailService.SendOrderConfirmationEmailAsync(
+                    toEmail: user.Email,
+                    toName: user.Name ?? model.Name,
+                    orderId: response.result,
+                    total: model.OrderTotal,
+                    city: model.City,
+                    address: model.Address
+                );
             }
 
             return RedirectToAction(nameof(OrderSuccess), new { id = response.result });

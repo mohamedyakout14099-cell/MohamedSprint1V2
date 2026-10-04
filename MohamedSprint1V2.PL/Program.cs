@@ -26,6 +26,9 @@ builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IFileService, LocalFileService>();
 builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.Configure<MohamedSprint1V2.DLL.ModelVM.Email.EmailSettings>(
+    builder.Configuration.GetSection("EmailSettings"));
+builder.Services.AddTransient<IEmailService, EmailService>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>

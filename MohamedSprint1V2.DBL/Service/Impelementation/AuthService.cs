@@ -8,10 +8,12 @@ namespace MohamedSprint1V2.DLL.Service.Impelementation
     public class AuthService : IAuthService
     {
         private readonly IUserRepo _userRepo;
+        private readonly IEmailService _emailService;
 
-        public AuthService(IUserRepo userRepo)
+        public AuthService(IUserRepo userRepo, IEmailService emailService)
         {
             _userRepo = userRepo;
+            _emailService = emailService;
         }
         public async Task<Response<IEnumerable<AllUserVM>>> GetAllUSers()
         {
@@ -108,6 +110,12 @@ namespace MohamedSprint1V2.DLL.Service.Impelementation
 
                 if (result)
                 {
+                    // Fire-and-forget welcome email so registration is never delayed
+                    if (!string.IsNullOrEmpty(newUser.Email))
+                    {
+                        _ = _emailService.SendWelcomeEmailAsync(newUser.Email, newUser.Name ?? newUser.UserName ?? "Customer");
+                    }
+
                     return new Response<bool>(true, "User registered successfully.", true);
                 }
 
